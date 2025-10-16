@@ -4,11 +4,15 @@ const mysql = require('mysql2'); // ← CAMBIO: mysql2 en lugar de pg
 const app = express();
 const PORT = 3000;
 
-// 📊 CONEXIÓN A MYSQL CON URL EXTERNA
+// 📊 CONEXIÓN A MYSQL CON PARÁMETROS SEPARADOS
 const connection = mysql.createConnection({
-    connectionString: 'mysql://ufywen8m7kyqrwjc:1kCrbPepW8X3ggZxkRWS@bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com:3306/bwri3movw18oiln4pb5h', // ← TU URL DE MYSQL AQUÍ
+    host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com', // ← Ejemplo: aws.connect.psdb.cloud
+    user: 'ufywen8m7kyqrwjc',                       // ← Tu usuario de MySQL
+    password: '1kCrbPepW8X3ggZxkRWS',                  // ← Tu contraseña
+    database: 'bwri3movw18oiln4pb5h',   // ← Nombre de la BD
+    port: 3306,                              // ← Puerto de MySQL (por defecto 3306)
     ssl: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false // ← IMPORTANTE para conexiones externas
     }
 });
 
