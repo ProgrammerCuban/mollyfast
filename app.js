@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql2'); // ← CAMBIO: mysql2 en lugar de pg
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 
 // 📊 CONEXIÓN A MYSQL CON PARÁMETROS SEPARADOS
 const connection = mysql.createConnection({
@@ -187,10 +188,9 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}/login`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
-
 
 function encriptarSimple(texto) {
     let resultado = '';
