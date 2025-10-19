@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viajes Disponibles</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="inicial()">
+    <div class="container">
+        <div class="header">
+            <h1>Tus viajes</h1>
+            <button class="btn-agregar" onclick="irAFormulario()" title="Agregar nuevo viaje">
+                +
+            </button>
+        </div>
+        
+        <!-- 📌 CONTENEDOR VACÍO - Los viajes se agregarán aquí -->
+        <div id="viajes-lista" class="viajes-lista">
+            <!-- Los viajes se cargarán aquí automáticamente desde JavaScript -->
+        </div>
+    </div>
+    
+    <script src="negocio.js"></script>
+</body>
+</html>
