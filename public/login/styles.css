@@ -1,0 +1,245 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+/* Estilos para el enlace de registro */
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.register-link p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.btn-register-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background: transparent;
+    color: #764ba2;
+    border: 2px solid #764ba2;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-register-link:hover {
+    background: #764ba2;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.3);
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: clamp(25px, 5vw, 40px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+}
+
+input {
+    width: 100%;
+    padding: clamp(12px, 3vw, 15px);
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.btn-login {
+    width: 100%;
+    padding: clamp(12px, 3vw, 15px);
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    .login-card {
+        padding: 30px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .login-container {
+        max-width: 100%;
+    }
+    
+    .login-card {
+        padding: 25px;
+        border-radius: 12px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+    
+    input {
+        padding: 12px;
+    }
+    
+    .btn-login {
+        padding: 12px;
+    }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 360px) {
+    .login-card {
+        padding: 20px;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    input {
+        padding: 10px;
+    }
+    
+    .btn-login {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Orientación landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    body {
+        padding: 10px;
+        align-items: flex-start;
+    }
+    
+    .login-container {
+        margin-top: 20px;
+    }
+    
+    .login-card {
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .login-card {
+        background: rgba(45, 45, 45, 0.95);
+        color: #ffffff;
+    }
+    
+    h2 {
+        color: #ffffff;
+    }
+    
+    label {
+        color: #ffffff;
+    }
+    
+    input {
+        background: #2c3e50;
+        border-color: #34495e;
+        color: #ffffff;
+    }
+    
+    input:focus {
+        border-color: #3498db;
+    }
+}
+
+/* Accesibilidad - reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+    .btn-login:hover {
+        transform: none;
+    }
+    
+    input, .btn-login {
+        transition: none;
+    }
+}
+
+/* Mejoras de enfoque para accesibilidad */
+.btn-login:focus,
+input:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}

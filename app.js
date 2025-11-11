@@ -189,7 +189,50 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
+});
+
+app.get('/viajes', async (req, res) => {
+        // Consulta a la tabla viajes
+        const query = `
+            SELECT 
+                id,
+                propietario,
+                precio,
+                detalles_adicionales
+            FROM viajes 
+        `;
+      connection.query(query, (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query' });
+        }
+        if (results.length > 0) {
+            console.log("yeeeeeeeees");
+           return res.json({ success: true, viajes: results });
+        } else {
+            console.log("nooooooooo");
+           return res.json({ success: false, message: 'Viajes no encontrado' });
+        }
+    });
+});
+
+// Ruta para obtener diccionario de usuarios
+app.get('/usuarios-id', async (req, res) => {
+ const query = `
+           SELECT id, usuario FROM usuarios
+        `;
+      connection.query(query, (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query' });
+        }
+        if (results.length > 0) {
+            console.log("yeeeeeeeees");
+           return res.json({ success: true, usuarios: results });
+        } else {
+            console.log("nooooooooo");
+           return res.json({ success: false, message: 'Viajes no encontrado' });
+        }
+    });
 });
 
 function encriptarSimple(texto) {

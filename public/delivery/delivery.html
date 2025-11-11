@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viajes Disponibles - MiDelivery</title>
+    <link rel="stylesheet" href="styledelivery.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚗 Viajes Disponibles</h1>
+            <p>Encuentra los mejores viajes cerca de ti</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterPrice">Filtrar por precio:</label>
+                <select id="filterPrice">
+                    <option value="all">Todos los precios</option>
+                    <option value="0-50">$0 - $50</option>
+                    <option value="51-100">$51 - $100</option>
+                    <option value="101-200">$101 - $200</option>
+                    <option value="201+">$201+</option>
+                </select>
+            </div>
+            <button id="refreshBtn" class="refresh-btn">🔄 Actualizar</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Cargando viajes...</p>
+        </div>
+
+        <div class="viajes-grid" id="viajesGrid">
+            <!-- Los viajes se cargarán aquí dinámicamente -->
+        </div>
+
+        <div class="no-viajes" id="noViajes" style="display: none;">
+            <div class="empty-state">
+                <h3>📭 No hay viajes disponibles</h3>
+                <p>No se encontraron viajes en este momento. Intenta más tarde.</p>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage" style="display: none;">
+            <div class="error-state">
+                <h3>❌ Error al cargar viajes</h3>
+                <p id="errorText">Ha ocurrido un error. Intenta nuevamente.</p>
+                <button onclick="cargarViajes()">Reintentar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="scriptdelivery.js"></script>
+</body>
+</html>

@@ -25,6 +25,10 @@ const contrasena = document.getElementById('password').value;
     
 }
 
+function redirectToRegister() {
+    window.location.href = "../register/register.html";
+}
+
 async function cargarpaginabussines(usuario) {
 
   const respuesta = await fetch('/encript',{
