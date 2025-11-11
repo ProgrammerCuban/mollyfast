@@ -21,8 +21,15 @@ const contrasena = document.getElementById('password').value;
 
     const datos = await respuesta.json();
 
-    if (datos.success) cargarpaginabussines(usuario);
-    
+    if (datos.success) {
+        console.log(datos.delivery);
+     if(datos.delivery == false) 
+      cargarpaginabussines(usuario);
+     else 
+     {
+       cargarpaginadelivery(usuario);
+     }
+    }
 }
 
 function redirectToRegister() {
@@ -46,5 +53,25 @@ async function cargarpaginabussines(usuario) {
   console.log(datos.coder);
 
   window.location.href = `../negocio/negocio.html#${datos.coder}`;
+    
+}
+
+async function cargarpaginadelivery(usuario) {
+
+  const respuesta = await fetch('/encript',{
+    method:'POST',
+    headers:{
+        'Content-Type': 'application/json',
+    },
+    body:JSON.stringify({
+        user: usuario
+    })
+  });
+
+  const datos = await respuesta.json();
+
+  console.log(datos.coder);
+
+  window.location.href = `../delivery/delivery.html#${datos.coder}`;
     
 }

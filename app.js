@@ -54,7 +54,8 @@ app.post('/loginsecion', (req, res) => {
             console.log("usuario correcto");
             return res.json({
                 success: true,
-                message: 'Usuario correcto'
+                message: 'Usuario correcto',
+                delivery: results[0].delivery
             });
         } else {
             console.log("usuario incorrecto");
@@ -188,10 +189,6 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
     });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
-});
-
 app.get('/viajes', async (req, res) => {
         // Consulta a la tabla viajes
         const query = `
@@ -235,6 +232,146 @@ app.get('/usuarios-id', async (req, res) => {
     });
 });
 
+app.get('/perfil/:id', (req, res) => {
+    const id = req.params.id;
+    const query = 'SELECT * FROM usuarios WHERE id = ?';
+    
+    connection.query(query, [id], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'error de la query' });
+        }
+        if (results.length > 0) {
+            console.log("yeeeeeeeees");
+           return res.json({ success: true, perfil: results });
+        } else {
+            console.log("nooooooooo");
+           return res.json({ success: false, message: 'no se encontraro el perfil' });
+        }
+    });
+});
+
+
+app.put('/change-username', (req, res) => {
+    const { id, username } = req.body;
+    
+    // Validaciones básicas
+    if (!id || !username) {
+        return res.json({ 
+            success: false, 
+            message: 'ID y username son requeridos' 
+        });
+    }
+
+    console.log('📝 Cambiando username:', { id, username });
+
+    // Query para verificar si el NUEVO username ya existe en OTRO usuario
+    const queryVerificar = `
+        SELECT id FROM usuarios 
+        WHERE usuario = ? AND id != ?
+    `;
+
+    // Query para actualizar
+    const queryActualizar = `
+        UPDATE usuarios 
+        SET usuario = ?
+        WHERE id = ?
+    `;
+
+    // 1. Primero verificar si el nuevo username ya existe
+    connection.query(queryVerificar, [username, id], (error, results) => {
+        if (error) {
+            console.error('❌ Error en query de verificación:', error);
+            return res.json({ 
+                success: false, 
+                message: 'Error verificando disponibilidad del username' 
+            });
+        }
+
+        // Si hay resultados, significa que el username ya está en uso
+        if (results.length > 0) {
+            console.log('❌ Username ya en uso:', username);
+            return res.json({ 
+                success: false, 
+                message: 'Este nombre de usuario ya está en uso, por favor intenta con otro' 
+            });
+        }
+
+        // 2. Si no está en uso, proceder con la actualización
+        connection.query(queryActualizar, [username, id], (error, results) => {
+            if (error) {
+                console.error('❌ Error en query de actualización:', error);
+                return res.json({ 
+                    success: false, 
+                    message: 'Error al cambiar el username' 
+                });
+            }
+
+            // Verificar si se actualizó algún registro
+            if (results.affectedRows === 0) {
+                return res.json({ 
+                    success: false, 
+                    message: 'Usuario no encontrado' 
+                });
+            }
+
+            console.log('✅ Username cambiado exitosamente');
+            return res.json({ 
+                success: true, 
+                message: 'Tu username ha sido cambiado con éxito',
+                newUsername: username
+            });
+        });
+    });
+});
+
+app.put('/change-password', (req, res) => {
+    const { id, pass } = req.body;
+    
+    // Validaciones básicas
+    if (!id || !pass) {
+        return res.json({ 
+            success: false, 
+            message: 'ID y password son requeridos' 
+        });
+    }
+
+    console.log('📝 Cambiando de contrasena :', { id, pass });
+
+    // Query para actualizar
+    const queryActualizar = `
+        UPDATE usuarios 
+        SET contrasena = ?
+        WHERE id = ?
+    `;
+
+
+        // 2. Si no está en uso, proceder con la actualización
+        connection.query(queryActualizar, [pass, id], (error, results) => {
+            if (error) {
+                console.error('❌ Error en query de actualización de contrasena :', error);
+                return res.json({ 
+                    success: false, 
+                    message: 'Error al cambiar la contrasena' 
+                });
+            }
+
+            // Verificar si se actualizó algún registro
+            if (results.affectedRows === 0) {
+                return res.json({ 
+                    success: false, 
+                    message: 'Usuario no encontrado' 
+                });
+            }
+
+            console.log('✅ pass cambiado exitosamente');
+            return res.json({ 
+                success: true, 
+                message: 'Tu contrasena ha sido cambiado con éxito',
+            });
+        });
+    });
+
+
 function encriptarSimple(texto) {
     let resultado = '';
     for (let i = 0; i < texto.length; i++) {
@@ -253,3 +390,7 @@ function desencriptarSimple(textoEncriptado) {
     }
     return resultado;
 }
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
+});

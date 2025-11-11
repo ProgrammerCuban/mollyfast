@@ -1,13 +1,43 @@
 const codigo = window.location.hash.substring(1);
 let namebussines = "";
 let idbussines = "";
+let usurio;
 
 
 async function inicial() {
-  await  obteneruser();
-   await obtenerid();
-   await cargarviajes();
+ await  obteneruser();
+ await obtenerid();
+ await cargarviajes();
+ await cargarFotoPerfil();
 }
+
+
+async function cargarFotoPerfil() {
+
+    const respuesta = await fetch(`/perfil/${idbussines}`);
+    
+    const data = await respuesta.json();
+    
+    if (data.success)
+    {
+        document.getElementById('profileHeaderImage').src = data.perfil[0].fotoperfil;
+        console.log(data.fotoperfil);
+        console.log("se cargo la foto de perfil");
+    }
+
+    else
+    {
+        console.error(data.message);
+    }
+
+}
+
+
+function irAlPerfil() {
+    console.log('👤 Redirigiendo a perfil...');
+    window.location.href = `perfil/perfil.html#${codigo}`;
+}
+
 
 async function obteneruser(){
   const respuesta = await fetch('/desencript',{

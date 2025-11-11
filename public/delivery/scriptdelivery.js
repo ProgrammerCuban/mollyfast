@@ -10,8 +10,6 @@ async function cargarDiccionarioUsuarios() {
            
             data.usuarios.forEach(element => {
                 diccionarioUsuarios[element.id] = element.usuario;
-                console.log(element.id);
-                console.log(element.usuario);
             });
 
             return diccionarioUsuarios;

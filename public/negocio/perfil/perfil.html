@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - MiDelivery</title>
+    <link rel="stylesheet" href="perfil.css">
+</head>
+<body onload="inicial()">
+    <div class="container">
+        <!-- Header con botón atrás -->
+        <header class="header">
+            <button class="back-btn" onclick="irAtras()">← Volver</button>
+            <h1>Mi Perfil</h1>
+        </header>
+
+        <!-- Sección de información del perfil -->
+        <div class="profile-section">
+            <!-- Foto de perfil -->
+            <div class="profile-picture">
+                <div class="photo-container">
+                    <img id="profileImage" src="" alt="Foto de perfil">
+                    <button class="change-photo-btn" onclick="abrirModal('fotoModal')">📷 Cambiar Foto</button>
+                </div>
+            </div>
+
+            <!-- Información del usuario -->
+            <div class="profile-info">
+                <div class="info-item">
+                    <label>Nombre de usuario:</label>
+                    <div class="info-value">
+                        <span id="usernameDisplay">Cargando...</span>
+                        <button class="edit-btn" onclick="abrirModal('usernameModal')">✏️ Editar</button>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label>Email:</label>
+                    <div class="info-value">
+                        <span id="emailDisplay">Cargando...</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label>Teléfono:</label>
+                    <div class="info-value">
+                        <span id="phoneDisplay">Cargando...</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label>Tipo de usuario:</label>
+                    <div class="info-value">
+                        <span id="userTypeDisplay">Cargando...</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label>Estado:</label>
+                    <div class="info-value">
+                        <span id="statusDisplay">Cargando...</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <label>Contraseña:</label>
+                    <div class="info-value">
+                        <span>••••••••</span>
+                        <button class="edit-btn" onclick="abrirModal('passwordModal')">✏️ Cambiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="guardarCambios()">💾 Guardar Cambios</button>
+            <button class="btn-secondary" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar foto -->
+    <div id="fotoModal" class="modal">
+        <div class="modal-content">
+            <h3>Cambiar Foto de Perfil</h3>
+            <input type="file" id="fotoInput" accept="image/*">
+            <div id="fotoPreview" class="preview-container"></div>
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="cambiarFoto()">Subir Foto</button>
+                <button class="btn-secondary" onclick="cerrarModal('fotoModal')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar username -->
+    <div id="usernameModal" class="modal">
+        <div class="modal-content">
+            <h3>Cambiar Nombre de Usuario</h3>
+            <input type="text" id="newUsername" placeholder="Nuevo nombre de usuario">
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="cambiarUsername()">Guardar</button>
+                <button class="btn-secondary" onclick="cerrarModal('usernameModal')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar contraseña -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>Cambiar Contraseña</h3>
+            <input type="password" id="currentPassword" placeholder="Contraseña actual">
+            <input type="password" id="newPassword" placeholder="Nueva contraseña">
+            <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+            <div class="modal-buttons">
+                <button class="btn-primary" onclick="cambiarPassword()">Cambiar Contraseña</button>
+                <button class="btn-secondary" onclick="cerrarModal('passwordModal')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar username (versión mejorada) -->
+<div id="usernameModal" class="modal">
+    <div class="modal-content">
+        <h3>Cambiar Nombre de Usuario</h3>
+        
+        <input type="text" id="newUsername" placeholder="Nuevo nombre de usuario">
+        
+        <!-- Mensajes de error/éxito -->
+        <div id="usernameError" class="error-message" style="display: none;"></div>
+        <div id="usernameSuccess" class="success-message" style="display: none;"></div>
+        
+        <div class="modal-buttons">
+            <button class="btn-primary" onclick="cambiarUsername()">Guardar</button>
+            <button class="btn-secondary" onclick="cerrarModal('usernameModal')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+    <script src="perfil.js"></script>
+</body>
+</html>
