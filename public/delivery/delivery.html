@@ -6,12 +6,24 @@
     <title>Viajes Disponibles - MiDelivery</title>
     <link rel="stylesheet" href="styledelivery.css">
 </head>
-<body>
+<body onload="cargarFotoPerfil()">
     <div class="container">
-        <header class="header">
-            <h1>🚗 Viajes Disponibles</h1>
-            <p>Encuentra los mejores viajes cerca de ti</p>
-        </header>
+        <div class="header-container">
+            <div class="header-content">
+                <header class="header">
+                    <h1>🚗 Viajes Disponibles</h1>
+                    <p>Encuentra los mejores viajes cerca de ti</p>
+                </header>
+            </div>
+            
+            <div class="profile-section">
+                <div class="profile-header">
+                    <div class="profile-circle" onclick="irAlPerfil()" title="Mi Perfil">
+                        <img id="profileHeaderImage" src="" alt="Foto de perfil">
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="filters">
             <div class="filter-group">

@@ -1,5 +1,9 @@
 // Variable global para el diccionario
 let diccionarioUsuarios = {};
+let idbussines;
+let namebussines;
+let codigo = window.location.hash.substring(1);
+
 
 async function cargarDiccionarioUsuarios() {
     try {
@@ -166,5 +170,70 @@ function mostrarError(mensaje) {
 
 function ocultarError() {
     errorMessageElement.style.display = 'none';
+}
+
+function irAlPerfil() {
+    console.log('👤 Redirigiendo a perfil...');
+    window.location.href = `perfil/perfil.html#${window.location.hash.substring(1)}`;
+}
+async function obtenerid() {
+
+    console.log(namebussines);
+      const respuestaid = await fetch('/obtenerid',{
+        method:'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({
+            user:namebussines
+        })
+    });
+
+
+    const datosid = await respuestaid.json();
+    idbussines = datosid.id;
+    console.log(idbussines);
+}
+
+async function obteneruser(){
+  const respuesta = await fetch('/desencript',{
+        method:'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({
+            code:codigo
+        })
+    });
+    const datos = await respuesta.json();
+    namebussines = datos.users;
+    
+}
+
+async function cargarFotoPerfil() {
+
+    await obtenerid();
+    await obteneruser();
+
+    console.log(namebussines);
+    console.log(idbussines);
+    console.log(codigo);
+
+    const respuesta = await fetch(`/perfil/${idbussines}`);
+    
+    const data = await respuesta.json();
+    
+    if (data.success)
+    {
+        document.getElementById('profileHeaderImage').src = data.perfil[0].fotoperfil;
+        console.log(data.fotoperfil);
+        console.log("se cargo la foto de perfil");
+    }
+
+    else
+    {
+        console.error(data.message);
+    }
+
 }
 

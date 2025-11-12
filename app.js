@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2'); // ← CAMBIO: mysql2 en lugar de pg
+const mysql = require('mysql2'); 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -370,6 +370,43 @@ app.put('/change-password', (req, res) => {
             });
         });
     });
+
+// Endpoint para actualizar foto de perfil en tu BD
+app.post('/change-profile-photo', async (req, res) => {
+        const { id, fotoUrl } = req.body;
+        
+        // Aquí tu lógica para actualizar en la base de datos
+        const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
+         connection.query(query, [fotoUrl, id], (error, results) => {
+        if (error) {
+            console.error('❌ Error en query de verificación:', error);
+            return res.json({ 
+                success: false, 
+                message: 'Error verificando disponibilidad del username' 
+            });
+        }
+
+        return res.json({
+            success: true
+        });
+});
+
+});
+
+
+// Endpoint para autenticación de ImageKit
+app.get('/imagekit-auth', (req, res) => {
+    const ImageKit = require('imagekit');
+    
+    const imagekit = new ImageKit({
+        publicKey: "public_4yRUn/8HyM6NpBO2uluT5n374JY=",
+        privateKey: "private_KrZVMBlNMU+KuDRUG6uX2tshYRk=", // Obtén esta clave desde ImageKit Dashboard
+        urlEndpoint: "https://ik.imagekit.io/yosvaC"
+    });
+    
+    const authenticationParameters = imagekit.getAuthenticationParameters();
+    res.send(authenticationParameters);
+});
 
 
 function encriptarSimple(texto) {
