@@ -96,10 +96,25 @@ function crearTarjetaViaje(viaje) {
     const card = document.createElement('div');
     card.className = 'viaje-card';
     
-    card.innerHTML = `
+    card.innerHTML =  `
         <div class="viaje-header">
             <span class="viaje-id">ID: ${viaje.id}</span>
             <div class="viaje-precio">$${viaje.precio}</div>
+        </div>
+        
+        <div class="viaje-ruta">
+            <div class="ruta-origen">
+                <strong>Salida:</strong> ${viaje.desde}
+                <div class="ubicacion-detalle">${viaje.municipio_salida}, ${viaje.provincia_salida}</div>
+            </div>
+            <div class="ruta-destino">
+                <strong>Llegada:</strong> ${viaje.hasta}
+                <div class="ubicacion-detalle">${viaje.provincia_llegada}</div>
+            </div>
+        </div>
+        
+        <div class="viaje-fecha">
+            <strong>Fecha de salida:</strong> ${viaje.fecha_salida}
         </div>
         
         <div class="viaje-propietario">
