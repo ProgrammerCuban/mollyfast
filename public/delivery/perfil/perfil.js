@@ -314,6 +314,36 @@ async function cambiarPassword() {
     }
 }
 
+async function cambiarUsername(){
+    const newuser = document.getElementById('newUsername').value;
+
+   const response = await fetch('/change-username', {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ 
+                id: idbussines, 
+                username: newuser
+            })
+        });
+
+        const data = await response.json();
+
+        if(!data.success) 
+        {
+            console.error(data.mensaje);
+            alert("ha ocurrido un error por favor intente nuevamente");
+            return;
+        }
+        else
+        {
+            alert("nombre cambiado correctamente");
+            cerrarModal("usernameModal");
+        }
+
+}
+
 // FUNCIONES DE NAVEGACIÓN
 async function irAtras() {
     const respuesta = await fetch('/encript',{

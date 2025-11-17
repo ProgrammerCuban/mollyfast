@@ -86,6 +86,7 @@ function mostrarViajes(viajesArray) {
     viajesGrid.innerHTML = '';
 
     viajesArray.forEach(viaje => {
+        console.log(viaje);
         const viajeCard = crearTarjetaViaje(viaje);
         viajesGrid.appendChild(viajeCard);
     });
@@ -104,17 +105,17 @@ function crearTarjetaViaje(viaje) {
         
         <div class="viaje-ruta">
             <div class="ruta-origen">
-                <strong>Salida:</strong> ${viaje.desde}
+                <strong>Salida:</strong> 
                 <div class="ubicacion-detalle">${viaje.municipio_salida}, ${viaje.provincia_salida}</div>
             </div>
             <div class="ruta-destino">
-                <strong>Llegada:</strong> ${viaje.hasta}
-                <div class="ubicacion-detalle">${viaje.provincia_llegada}</div>
+                <strong>Llegada:</strong>
+                <div class="ubicacion-detalle">${viaje.provincia_llegada}, ${viaje.municipio_llegada}</div>
             </div>
         </div>
         
         <div class="viaje-fecha">
-            <strong>Fecha de salida:</strong> ${viaje.fecha_salida}
+            <strong>Fecha de salida:</strong> ${formatearFecha(viaje.fecha_salida)}
         </div>
         
         <div class="viaje-propietario">
@@ -130,26 +131,22 @@ function crearTarjetaViaje(viaje) {
     return card;
 }
 
-// Filtrar viajes por precio
 function filtrarViajes() {
     const filtro = filterPrice.value;
     let viajesFiltrados = [...viajes];
 
     switch (filtro) {
-        case '0-50':
-            viajesFiltrados = viajes.filter(v => v.precio <= 50);
+        case 'mayor-menor':
+            viajesFiltrados = viajes.sort((a, b) => b.precio - a.precio);
             break;
-        case '51-100':
-            viajesFiltrados = viajes.filter(v => v.precio > 50 && v.precio <= 100);
+        case 'menor-mayor':
+            viajesFiltrados = viajes.sort((a, b) => a.precio - b.precio);
             break;
-        case '101-200':
-            viajesFiltrados = viajes.filter(v => v.precio > 100 && v.precio <= 200);
-            break;
-        case '201+':
-            viajesFiltrados = viajes.filter(v => v.precio > 200);
+        case 'mas-rapido':
+            viajesFiltrados = viajes.sort((a, b) => new Date(a.fecha_salida) - new Date(b.fecha_salida));
             break;
         default:
-            // 'all' - mostrar todos
+            // 'all' - mostrar todos sin ordenar
             break;
     }
 
@@ -194,6 +191,8 @@ function irAlPerfil() {
 async function obtenerid() {
 
     console.log(namebussines);
+
+    console.log(namebussines);
       const respuestaid = await fetch('/obtenerid',{
         method:'POST',
         headers: {
@@ -227,9 +226,8 @@ async function obteneruser(){
 
 async function cargarFotoPerfil() {
 
-    await obtenerid();
     await obteneruser();
-
+    await obtenerid();
     console.log(namebussines);
     console.log(idbussines);
     console.log(codigo);
@@ -252,3 +250,18 @@ async function cargarFotoPerfil() {
 
 }
 
+function formatearFecha(fechaISO) {
+    const fecha = new Date(fechaISO);
+    
+    // Formato: "20 de marzo de 2024, 4:00 AM"
+    const opciones = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    };
+    
+    return fecha.toLocaleDateString('es-ES', opciones);
+}

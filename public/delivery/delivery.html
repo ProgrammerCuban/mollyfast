@@ -27,15 +27,14 @@
 
         <div class="filters">
             <div class="filter-group">
-                <label for="filterPrice">Filtrar por precio:</label>
-                <select id="filterPrice">
-                    <option value="all">Todos los precios</option>
-                    <option value="0-50">$0 - $50</option>
-                    <option value="51-100">$51 - $100</option>
-                    <option value="101-200">$101 - $200</option>
-                    <option value="201+">$201+</option>
-                </select>
-            </div>
+    <label for="filterPrice">Ordenar por:</label>
+    <select id="filterPrice">
+        <option value="all">Todos los viajes</option>
+        <option value="mayor-menor">Mayor a menor precio</option>
+        <option value="menor-mayor">Menor a mayor precio</option>
+        <option value="mas-rapido">Más rápido (fecha más cercana)</option>
+    </select>
+</div>
             <button id="refreshBtn" class="refresh-btn">🔄 Actualizar</button>
         </div>
 

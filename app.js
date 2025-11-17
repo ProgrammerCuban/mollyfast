@@ -1,21 +1,36 @@
 const express = require('express');
 const path = require('path');
 const mysql = require('mysql2'); 
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 // 📊 CONEXIÓN A MYSQL CON PARÁMETROS SEPARADOS
 const connection = mysql.createConnection({
-    host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com', // ← Ejemplo: aws.connect.psdb.cloud
-    user: 'ufywen8m7kyqrwjc',                       // ← Tu usuario de MySQL
-    password: '1kCrbPepW8X3ggZxkRWS',                  // ← Tu contraseña
-    database: 'bwri3movw18oiln4pb5h',   // ← Nombre de la BD
-    port: 3306,                              // ← Puerto de MySQL (por defecto 3306)
+    host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com',
+    user: 'ufywen8m7kyqrwjc',                    
+    password: '1kCrbPepW8X3ggZxkRWS',                  
+    database: 'bwri3movw18oiln4pb5h',  
+    port: 3306,                              
     ssl: {
-        rejectUnauthorized: false // ← IMPORTANTE para conexiones externas
+        rejectUnauthorized: false // 
     }
 });
+
+// 🗄️ CONFIGURACIÓN DE ALMACENAMIENTO DE SESIONES EN MYSQL
+const sessionStore = new MySQLStore({
+    createDatabaseTable: true,
+    schema: {
+        tableName: 'user_sessions',
+        columnNames: {
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    }
+}, connection);
 
 // 🔌 VERIFICAR LA CONEXIÓN
 connection.connect((error) => {
@@ -39,6 +54,50 @@ app.get('/', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(cookieParser());
+app.use(session({
+    secret: 'C27PZXMv.@', 
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore, // ¡USAMOS EL STORE PERSISTENTE!
+    cookie: {
+        secure: false, 
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+    }
+}));
+
+function requireAuth(req, res, next) {
+    if (req.session.userId) {
+        next();
+    } else {
+        res.status(401).json({ 
+            success: false, 
+            message: 'No autorizado - Inicia sesión primero' 
+        });
+    }
+}
+
+// AGREGAR ESTE ENDPOINT A TU BACKEND
+app.get('/check-session', (req, res) => {
+    if (req.session.userId) {
+        // El usuario tiene sesión activa
+        res.json({
+            success: true,
+            id: req.session.userId,
+            name: req.session.userName,
+            delivery: req.session.delivery,
+            sessionData: req.session
+        });
+    } else {
+        // No hay sesión activa
+        res.json({
+            success: false,
+            message: 'No hay sesión activa'
+        });
+    }
+});
+
 app.post('/loginsecion', (req, res) => {
     const { user, pass } = req.body;
 
@@ -51,6 +110,11 @@ app.post('/loginsecion', (req, res) => {
         if (error != null) console.error(error);
         
         if (results.length > 0) {
+
+            req.session.userId = results[0].id;
+            req.session.userName = results[0].usuario;
+            req.session.delivery = results[0].delivery;
+            
             console.log("usuario correcto");
             return res.json({
                 success: true,
@@ -196,7 +260,14 @@ app.get('/viajes', async (req, res) => {
                 id,
                 propietario,
                 precio,
-                detalles_adicionales
+                detalles_adicionales,
+                desde,
+                hasta,
+                provincia_salida,
+                municipio_salida,
+                provincia_llegada,
+                municipio_llegada,
+                fecha_salida
             FROM viajes 
         `;
       connection.query(query, (error, results) => {
@@ -394,20 +465,18 @@ app.post('/change-profile-photo', async (req, res) => {
 });
 
 
-// Endpoint para autenticación de ImageKit
 app.get('/imagekit-auth', (req, res) => {
     const ImageKit = require('imagekit');
     
     const imagekit = new ImageKit({
         publicKey: "public_4yRUn/8HyM6NpBO2uluT5n374JY=",
-        privateKey: "private_KrZVMBlNMU+KuDRUG6uX2tshYRk=", // Obtén esta clave desde ImageKit Dashboard
+        privateKey: "private_KrZVMBlNMU+KuDRUG6uX2tshYRk=",
         urlEndpoint: "https://ik.imagekit.io/yosvaC"
     });
     
     const authenticationParameters = imagekit.getAuthenticationParameters();
     res.send(authenticationParameters);
 });
-
 
 function encriptarSimple(texto) {
     let resultado = '';

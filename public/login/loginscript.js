@@ -1,7 +1,4 @@
 
-
-
-
 async function comprueba()
 {
 const usuario = document.getElementById('usuario').value;
@@ -74,4 +71,23 @@ async function cargarpaginadelivery(usuario) {
 
   window.location.href = `../delivery/delivery.html#${datos.coder}`;
     
+}
+
+async function cookies() {
+  
+  const response = await fetch("/check-session");
+
+  const data = await response.json();
+
+  if(data.success)
+  {
+    if(data.delivery == true) cargarpaginadelivery(data.name);
+    else cargarpaginabussines(data.name);
+  }
+
+  else 
+  {
+     console.log("no hay sesion activa");
+  }
+
 }
