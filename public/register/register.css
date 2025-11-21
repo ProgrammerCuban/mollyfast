@@ -1,0 +1,550 @@
+/* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Contenedor principal */
+.register-container {
+    width: 100%;
+    max-width: 500px;
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Tarjeta de registro */
+.register-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Encabezado de paso */
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.step-indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.step-header h2 {
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* Grupos de input */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+/* ESTILOS MEJORADOS PARA LA SELECCIÓN DE TIPO DE USUARIO */
+.user-type-selection {
+    margin: 20px 0;
+}
+
+.user-type-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.user-type-option {
+    flex: 1;
+    min-width: 140px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 20px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-type-option:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.user-type-option.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f4ff, #e8edff);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Indicador de selección */
+.user-type-option.selected::before {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Efecto de pulso para la opción seleccionada */
+.user-type-option.selected::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid #667eea;
+    border-radius: 14px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    }
+}
+
+.user-type-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.user-type-option.selected .user-type-icon {
+    transform: scale(1.1);
+}
+
+.user-type-label {
+    font-weight: 700;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.user-type-option.selected .user-type-label {
+    color: #667eea;
+}
+
+.user-type-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.user-type-option.selected .user-type-description {
+    color: #555;
+}
+
+/* Estados de foco para accesibilidad */
+.user-type-option:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Botones */
+.submit-btn, .verify-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.submit-btn:hover, .verify-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:active, .verify-btn:active {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled, .verify-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Botón reenviar */
+.resend-btn {
+    width: 100%;
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.resend-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Contenido de verificación */
+.verification-content {
+    text-align: center;
+}
+
+.verification-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.verification-text {
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.verification-actions {
+    margin-top: 20px;
+}
+
+/* Mensajes */
+.message {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    display: none;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+/* Estilos para cuando hay error de validación en tipo de usuario */
+.user-type-selection.error .user-type-options {
+    border: 1px solid #f44336;
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffebee;
+}
+
+.user-type-selection.error::after {
+    content: "Por favor, selecciona un tipo de usuario";
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* RESPONSIVE MEJORADO */
+@media (max-width: 768px) {
+    .register-container {
+        max-width: 450px;
+    }
+    
+    .register-card {
+        padding: 30px 25px;
+    }
+    
+    .step-header h2 {
+        font-size: 22px;
+    }
+    
+    .step-indicator {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+    
+    .user-type-options {
+        gap: 12px;
+    }
+    
+    .user-type-option {
+        min-width: 120px;
+        padding: 15px 10px;
+    }
+    
+    .user-type-icon {
+        font-size: 28px;
+    }
+    
+    .user-type-label {
+        font-size: 15px;
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+    body {
+        padding: 15px;
+    }
+    
+    .register-container {
+        max-width: 100%;
+    }
+    
+    .register-card {
+        padding: 25px 20px;
+        border-radius: 15px;
+    }
+    
+    .step-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .step-header h2 {
+        font-size: 20px;
+    }
+    
+    .input-group input {
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    .submit-btn, .verify-btn, .resend-btn {
+        padding: 15px;
+        font-size: 16px;
+    }
+    
+    .verification-icon {
+        font-size: 50px;
+    }
+    
+    .user-type-options {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .user-type-option {
+        min-width: 100%;
+        padding: 18px 15px;
+        display: flex;
+        align-items: center;
+        text-align: left;
+        gap: 15px;
+    }
+    
+    .user-type-icon {
+        font-size: 24px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .user-type-content {
+        flex: 1;
+    }
+    
+    .user-type-label {
+        margin-bottom: 4px;
+    }
+    
+    .user-type-option.selected::before {
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+    }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 360px) {
+    .register-card {
+        padding: 20px 15px;
+    }
+    
+    .step-header h2 {
+        font-size: 18px;
+    }
+    
+    .input-group label {
+        font-size: 13px;
+    }
+    
+    .user-type-option {
+        padding: 15px 12px;
+    }
+    
+    .user-type-icon {
+        font-size: 22px;
+    }
+}
+
+/* Modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+    .register-card {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .step-header h2 {
+        color: white;
+    }
+    
+    .input-group label {
+        color: white;
+    }
+    
+    .input-group input {
+        background: #4a5568;
+        border-color: #4a5568;
+        color: white;
+    }
+    
+    .input-group input:focus {
+        background: #4a5568;
+        border-color: #667eea;
+    }
+    
+    .input-group input::placeholder {
+        color: #a0aec0;
+    }
+    
+    .user-type-option {
+        background: #4a5568;
+        border-color: #4a5568;
+        color: #a0aec0;
+    }
+    
+    .user-type-option:hover {
+        border-color: #667eea;
+    }
+    
+    .user-type-option.selected {
+        background: linear-gradient(135deg, #4a5568, #667eea);
+        border-color: #667eea;
+    }
+    
+    .user-type-label {
+        color: white;
+    }
+    
+    .user-type-option.selected .user-type-label {
+        color: white;
+    }
+    
+    .user-type-description {
+        color: #a0aec0;
+    }
+    
+    .user-type-selection.error .user-type-options {
+        background: #742a2a;
+        border-color: #f44336;
+    }
+}

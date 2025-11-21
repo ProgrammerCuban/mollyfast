@@ -75,19 +75,19 @@ async function cargarpaginadelivery(usuario) {
 
 async function cookies() {
   
-  const response = await fetch("/check-session");
+  // const response = await fetch("/check-session");
 
-  const data = await response.json();
+  // const data = await response.json();
 
-  if(data.success)
-  {
-    if(data.delivery == true) cargarpaginadelivery(data.name);
-    else cargarpaginabussines(data.name);
-  }
+  // if(data.success)
+  // {
+  //   if(data.delivery == true) cargarpaginadelivery(data.name);
+  //   else cargarpaginabussines(data.name);
+  // }
 
-  else 
-  {
-     console.log("no hay sesion activa");
-  }
+  // else 
+  // {
+  //    console.log("no hay sesion activa");
+  // }
 
 }

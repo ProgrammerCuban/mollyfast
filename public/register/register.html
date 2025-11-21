@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="register.css">
+    <!-- Agrega EmailJS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <!-- Paso 1: Registro -->
+            <div class="step" id="step1">
+                <div class="step-header">
+                    <div class="step-indicator active">1</div>
+                    <h2>Crear Cuenta</h2>
+                </div>
+                
+                <form class="register-form" id="registerForm">
+                    <div class="input-group">
+                        <label for="username">Nombre de Usuario</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Ej: juan123"
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="Ej: juan@correo.com"
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Mínimo 6 caracteres"
+                            required
+                            minlength="6"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirmar Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            placeholder="Repite tu contraseña"
+                            required
+                        >
+                    </div>
+
+                    <!-- NUEVA SECCIÓN: Selección de Tipo de Usuario -->
+                    <div class="input-group user-type-selection">
+                        <label>Tipo de Usuario <span style="color: #f44336">*</span></label>
+                        <div class="user-type-options">
+                            <div class="user-type-option" data-value="negocio" tabindex="0">
+                                <span class="user-type-icon">🏪</span>
+                                <div class="user-type-content">
+                                    <span class="user-type-label">Negocio</span>
+                                    <span class="user-type-description">Ofrece tus productos o servicios a la comunidad</span>
+                                </div>
+                            </div>
+                            <div class="user-type-option" data-value="delivery" tabindex="0">
+                                <span class="user-type-icon">🚚</span>
+                                <div class="user-type-content">
+                                    <span class="user-type-label">Delivery</span>
+                                    <span class="user-type-description">Realiza entregas y gana dinero con cada pedido</span>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="userType" name="userType" required>
+                        <div class="error-message" id="userTypeError" style="display: none; color: #f44336; font-size: 12px; margin-top: 5px;">
+                            Por favor, selecciona un tipo de usuario
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Continuar</span>
+                        <span class="btn-loading" style="display: none;">⏳</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Paso 2: Verificación -->
+            <div class="step" id="step2" style="display: none;">
+                <div class="step-header">
+                    <div class="step-indicator">2</div>
+                    <h2>Verificar Email</h2>
+                </div>
+
+                <div class="verification-content">
+                    <div class="verification-icon">📧</div>
+                    <p class="verification-text">
+                        Hemos enviado un código de verificación a:<br>
+                        <strong id="userEmailDisplay">usuario@ejemplo.com</strong>
+                    </p>
+
+                    <div class="input-group">
+                        <label for="verificationCode">Código de Verificación</label>
+                        <input 
+                            type="text" 
+                            id="verificationCode" 
+                            placeholder="Ingresa el código de 6 dígitos"
+                            maxlength="6"
+                        >
+                    </div>
+
+                    <div class="verification-actions">
+                        <button type="button" class="verify-btn" id="verifyBtn">
+                            Verificar Código
+                        </button>
+                        <button type="button" class="resend-btn" id="resendBtn">
+                            Reenviar Código
+                        </button>
+                    </div>
+
+                    <div class="message" id="verificationMessage"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="register.js"></script>
+</body>
+</html>

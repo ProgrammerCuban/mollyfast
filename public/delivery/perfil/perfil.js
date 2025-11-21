@@ -340,6 +340,8 @@ async function cambiarUsername(){
         {
             alert("nombre cambiado correctamente");
             cerrarModal("usernameModal");
+            document.getElementById('usernameDisplay').textContent  = newuser;
+            usuario.usuario = newuser; 
         }
 
 }
@@ -358,7 +360,7 @@ async function irAtras() {
 
     const datos = await respuesta.json();
     console.log(datos.coder);
-    window.location.href = `../negocio.html#${datos.coder}`;
+    window.location.href = `../delivery.html#${datos.coder}`;
 }
 
 function cerrarSesion() {

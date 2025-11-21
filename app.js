@@ -4,6 +4,8 @@ const mysql = require('mysql2');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer');
+const router = express.Router();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -15,7 +17,7 @@ const connection = mysql.createConnection({
     database: 'bwri3movw18oiln4pb5h',  
     port: 3306,                              
     ssl: {
-        rejectUnauthorized: false // 
+        rejectUnauthorized: false
     }
 });
 
@@ -41,32 +43,232 @@ connection.connect((error) => {
     }
 });
 
-app.use(express.static('public'));
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/login/login.html'));
-});
-
-app.get('/', (req, res) => {
-    res.redirect('/login');
-});
-
+// ✅ MIDDLEWARES PRIMERO
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
 app.use(session({
     secret: 'C27PZXMv.@', 
     resave: false,
     saveUninitialized: false,
-    store: sessionStore, // ¡USAMOS EL STORE PERSISTENTE!
+    store: sessionStore,
     cookie: {
         secure: false, 
         maxAge: 365 * 24 * 60 * 60 * 1000,
         httpOnly: true
     }
 }));
+app.use(express.static('public'));
 
+// 🔧 CONFIGURACIÓN ROBUSTA DE EMAIL
+function createTransporter() {
+    return nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: {
+            user: 'mollyfast.delivery@gmail.com',
+            pass: 'cslp ihak xl ow plnv'
+        },
+        tls: {
+            rejectUnauthorized: false,
+            ciphers: 'SSLv3'
+        },
+        // ⚡ CONFIGURACIÓN DE CONEXIÓN MEJORADA
+        connectionTimeout: 30000,
+        greetingTimeout: 30000,
+        socketTimeout: 45000,
+        debug: false,
+        logger: false
+    });
+}
+
+// 📧 FUNCIÓN MEJORADA CON REINTENTOS INTELIGENTES
+async function sendVerificationCode(userEmail, userName, verificationCode, maxRetries = 3) {
+    let lastError = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        let transporter = null;
+        
+        try {
+            console.log(`📧 Intento ${attempt}/${maxRetries} para ${userEmail}`);
+            
+            // Crear NUEVA instancia del transporter para cada intento
+            transporter = createTransporter();
+            
+            // Verificar conexión con timeout
+            const verifyPromise = transporter.verify();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout en verificación')), 10000)
+            );
+            
+            await Promise.race([verifyPromise, timeoutPromise]);
+            console.log('✅ Conexión SMTP verificada');
+            
+            // Configurar opciones del email
+            const mailOptions = {
+                from: '"MolyFats" <mollyfast.delivery@gmail.com>',
+                to: userEmail,
+                subject: 'Tu código de verificación - MolyFats',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                        <h2 style="color: #4CAF50; text-align: center;">✅ Verificación de Email</h2>
+                        <p>Hola <strong>${userName}</strong>,</p>
+                        <p>Tu código de verificación para <strong>MolyFats</strong> es:</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 32px; font-weight: bold; color: #4CAF50; letter-spacing: 8px; padding: 15px; background: #f9f9f9; border: 2px dashed #4CAF50; border-radius: 8px; display: inline-block;">
+                                ${verificationCode}
+                            </div>
+                        </div>
+                        <p>🔒 <strong>Este código expirará en 10 minutos</strong></p>
+                        <p style="color: #666; font-size: 12px; text-align: center;">
+                            Si no solicitaste este código, ignora este mensaje.
+                        </p>
+                    </div>
+                `
+            };
+            
+            // Enviar email con timeout
+            const sendPromise = transporter.sendMail(mailOptions);
+            const sendTimeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout en envío')), 15000)
+            );
+            
+            const result = await Promise.race([sendPromise, sendTimeoutPromise]);
+            
+            console.log(`✅ Email enviado exitosamente en intento ${attempt}`);
+            
+            // Cerrar conexión explícitamente
+            if (transporter) {
+                transporter.close();
+            }
+            
+            return {
+                success: true,
+                messageId: result.messageId,
+                attempt: attempt
+            };
+            
+        } catch (error) {
+            lastError = error;
+            console.error(`❌ Intento ${attempt} fallido:`, error.message);
+            
+            // Cerrar conexión si existe
+            if (transporter) {
+                try {
+                    transporter.close();
+                } catch (closeError) {
+                    console.log('⚠️ Error cerrando transporter:', closeError.message);
+                }
+            }
+            
+            // Si no es el último intento, esperar con backoff exponencial
+            if (attempt < maxRetries) {
+                const backoffTime = Math.pow(2, attempt) * 1000;
+                console.log(`⏳ Esperando ${backoffTime/1000} segundos antes del reintento...`);
+                await new Promise(resolve => setTimeout(resolve, backoffTime));
+            }
+        }
+    }
+    
+    // Si llegamos aquí, todos los intentos fallaron
+    throw new Error(`Todos los ${maxRetries} intentos fallaron. Último error: ${lastError.message}`);
+}
+
+// 🧪 ENDPOINT DE PRUEBA DE EMAIL
+app.get('/api/email/test', async (req, res) => {
+    try {
+        console.log('🧪 Probando configuración de email...');
+        
+        const testEmail = 'test@example.com';
+        const testName = 'Usuario Test';
+        const testCode = '123456';
+        
+        const result = await sendVerificationCode(testEmail, testName, testCode, 1);
+        
+        res.json({
+            success: true,
+            message: 'Prueba de email exitosa',
+            details: result
+        });
+        
+    } catch (error) {
+        console.error('❌ Prueba de email fallida:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Prueba de email fallida',
+            error: error.message
+        });
+    }
+});
+
+// 🌐 ENDPOINT MEJORADO DE VERIFICACIÓN DE EMAIL
+app.post('/api/email/send-verification', async (req, res) => {
+    console.log('📨 Solicitud recibida en /api/email/send-verification');
+    
+    try {
+        const { userEmail, userName } = req.body;
+
+        // Validaciones
+        if (!userEmail || !userName) {
+            console.log('❌ Datos incompletos:', { userEmail, userName });
+            return res.status(400).json({
+                success: false,
+                message: 'Email y nombre son requeridos'
+            });
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(userEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Formato de email inválido'
+            });
+        }
+
+        console.log(`🎯 Generando código para: ${userEmail} (${userName})`);
+        
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log(`🔐 Código generado: ${verificationCode}`);
+        
+        // Intentar enviar el email con reintentos
+        const result = await sendVerificationCode(userEmail, userName, verificationCode, 3);
+        
+        console.log(`🎉 Email enviado exitosamente después de ${result.attempt} intento(s)`);
+        
+        res.json({
+            success: true,
+            message: 'Código enviado correctamente',
+            code: verificationCode,
+            attempt: result.attempt
+        });
+        
+    } catch (error) {
+        console.error('💥 Error crítico en endpoint:', error.message);
+        
+        // Enviar respuesta de error específica
+        let errorMessage = 'Error al enviar el código. Por favor, intenta nuevamente.';
+        let statusCode = 500;
+        
+        if (error.message.includes('Timeout')) {
+            errorMessage = 'El servidor de email está respondiendo lentamente. Intenta nuevamente.';
+        } else if (error.message.includes('EAUTH')) {
+            errorMessage = 'Problema de autenticación con el servicio de email.';
+        } else if (error.message.includes('ECONNECTION')) {
+            errorMessage = 'No se pudo conectar al servicio de email. Verifica tu conexión.';
+        }
+        
+        res.status(statusCode).json({
+            success: false,
+            message: errorMessage,
+            technicalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+// 🔒 FUNCIÓN DE AUTENTICACIÓN
 function requireAuth(req, res, next) {
     if (req.session.userId) {
         next();
@@ -78,10 +280,21 @@ function requireAuth(req, res, next) {
     }
 }
 
-// AGREGAR ESTE ENDPOINT A TU BACKEND
+// 🎯 RUTAS DE LA APLICACIÓN
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/login/login.html'));
+});
+
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/admin/login.html'));
+});
+
 app.get('/check-session', (req, res) => {
     if (req.session.userId) {
-        // El usuario tiene sesión activa
         res.json({
             success: true,
             id: req.session.userId,
@@ -90,7 +303,6 @@ app.get('/check-session', (req, res) => {
             sessionData: req.session
         });
     } else {
-        // No hay sesión activa
         res.json({
             success: false,
             message: 'No hay sesión activa'
@@ -110,7 +322,6 @@ app.post('/loginsecion', (req, res) => {
         if (error != null) console.error(error);
         
         if (results.length > 0) {
-
             req.session.userId = results[0].id;
             req.session.userName = results[0].usuario;
             req.session.delivery = results[0].delivery;
@@ -133,22 +344,59 @@ app.post('/loginsecion', (req, res) => {
 
 app.post('/desencript', (req, res) => {
     const { code } = req.body;
+    const user = desencriptarSimple(code);
+    return res.json({ 
+        users: user, 
+    });
+});
 
-     const user = desencriptarSimple(code);
-     return res.json({ 
-                users: user, 
+app.post('/api/register', (req, res) => {
+    const { username, email, password } = req.body;
+
+    // Primero verificar si el usuario ya existe
+    const checkQuery = 'SELECT id FROM usuarios WHERE usuario = ? OR gmail = ?';
+    
+    connection.query(checkQuery, [username, email], (error, results) => {
+        if (error) {
+            console.error('Error verificando usuario:', error);
+            return res.json({ success: false, message: 'Error del servidor' });
+        }
+        
+        if (results.length > 0) {
+            return res.json({ 
+                success: false, 
+                message: 'El usuario o email ya existen' 
             });
+        }
+        
+        // Insertar nuevo usuario
+        const insertQuery = 'INSERT INTO usuarios (usuario, contrasena, gmail, estado) VALUES (?, ?, ?, ?)';
+        connection.query(insertQuery, [username, password, email, 4], (error, results) => {
+            if (error) {
+                console.error('Error registrando usuario:', error);
+                return res.json({ 
+                    success: false, 
+                    message: 'Error al registrar usuario' 
+                });
+            }
+            
+            console.log(`✅ Usuario ${username} registrado correctamente`);
+            res.json({ 
+                success: true, 
+                message: 'Usuario creado correctamente',
+                userId: results.insertId
+            });
+        });
+    });
 });
 
 app.post('/encript', (req, res) => {
     const { user } = req.body;
-
-     const code = encriptarSimple(user);
-     console.log(code);
-
-     return res.json({ 
-                coder: code, 
-            });
+    const code = encriptarSimple(user);
+    console.log(code);
+    return res.json({ 
+        coder: code, 
+    });
 });
 
 app.post('/obtenerid', (req, res) => {
@@ -157,11 +405,11 @@ app.post('/obtenerid', (req, res) => {
 
     console.log(user);
     
-     connection.query(query, [user], (error, results) => {
+    connection.query(query, [user], (error, results) => {
         if (results.length > 0) {
-          return  res.json({ success: true, id: results[0].id});
+            return res.json({ success: true, id: results[0].id});
         } else {
-          return  res.json({ success: false, message: 'usuario no encontrado' });
+            return res.json({ success: false, message: 'usuario no encontrado' });
         }
     });
 });
@@ -175,11 +423,11 @@ app.get('/viajes/:id', (req, res) => {
             return res.json({ success: false, message: 'Error' });
         }
         if (results.length > 0) {
-            console.log("yeeeeeeeees");
-           return res.json({ success: true, viaje: results });
+            console.log("Viajes encontrados");
+            return res.json({ success: true, viaje: results });
         } else {
-            console.log("nooooooooo");
-           return res.json({ success: false, message: 'Viaje no encontrado' });
+            console.log("No hay viajes");
+            return res.json({ success: false, message: 'Viaje no encontrado' });
         }
     });
 });
@@ -254,51 +502,50 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
 });
 
 app.get('/viajes', async (req, res) => {
-        // Consulta a la tabla viajes
-        const query = `
-            SELECT 
-                id,
-                propietario,
-                precio,
-                detalles_adicionales,
-                desde,
-                hasta,
-                provincia_salida,
-                municipio_salida,
-                provincia_llegada,
-                municipio_llegada,
-                fecha_salida
-            FROM viajes 
-        `;
-      connection.query(query, (error, results) => {
+    const query = `
+        SELECT 
+            id,
+            propietario,
+            precio,
+            detalles_adicionales,
+            desde,
+            hasta,
+            provincia_salida,
+            municipio_salida,
+            provincia_llegada,
+            municipio_llegada,
+            fecha_salida
+        FROM viajes 
+    `;
+    
+    connection.query(query, (error, results) => {
         if (error) {
             return res.json({ success: false, message: 'Error en la query' });
         }
         if (results.length > 0) {
-            console.log("yeeeeeeeees");
-           return res.json({ success: true, viajes: results });
+            console.log("Viajes encontrados");
+            return res.json({ success: true, viajes: results });
         } else {
-            console.log("nooooooooo");
-           return res.json({ success: false, message: 'Viajes no encontrado' });
+            console.log("No hay viajes");
+            return res.json({ success: false, message: 'Viajes no encontrados' });
         }
     });
 });
 
 // Ruta para obtener diccionario de usuarios
 app.get('/usuarios-id', async (req, res) => {
- const query = `
-           SELECT id, usuario FROM usuarios
-        `;
-      connection.query(query, (error, results) => {
+    const query = 'SELECT id, usuario FROM usuarios';
+    
+    connection.query(query, (error, results) => {
         if (error) {
             return res.json({ success: false, message: 'Error en la query' });
         }
         if (results.length > 0) {
-            console.log("yeeeeeeeees");
-           return res.json({ success: true, usuarios: results });
+            console.log("Usuarios encontrados");
+            return res.json({ success: true, usuarios: results });
         } else {
-            console.log("nooooooooo");
-           return res.json({ success: false, message: 'Viajes no encontrado' });
+            console.log("No hay usuarios");
+            return res.json({ success: false, message: 'Usuarios no encontrados' });
         }
     });
 });
@@ -312,15 +559,14 @@ app.get('/perfil/:id', (req, res) => {
             return res.json({ success: false, message: 'error de la query' });
         }
         if (results.length > 0) {
-            console.log("yeeeeeeeees");
-           return res.json({ success: true, perfil: results });
+            console.log("Perfil encontrado");
+            return res.json({ success: true, perfil: results });
         } else {
-            console.log("nooooooooo");
-           return res.json({ success: false, message: 'no se encontraro el perfil' });
+            console.log("Perfil no encontrado");
+            return res.json({ success: false, message: 'no se encontró el perfil' });
         }
     });
 });
-
 
 app.put('/change-username', (req, res) => {
     const { id, username } = req.body;
@@ -336,17 +582,10 @@ app.put('/change-username', (req, res) => {
     console.log('📝 Cambiando username:', { id, username });
 
     // Query para verificar si el NUEVO username ya existe en OTRO usuario
-    const queryVerificar = `
-        SELECT id FROM usuarios 
-        WHERE usuario = ? AND id != ?
-    `;
+    const queryVerificar = 'SELECT id FROM usuarios WHERE usuario = ? AND id != ?';
 
     // Query para actualizar
-    const queryActualizar = `
-        UPDATE usuarios 
-        SET usuario = ?
-        WHERE id = ?
-    `;
+    const queryActualizar = 'UPDATE usuarios SET usuario = ? WHERE id = ?';
 
     // 1. Primero verificar si el nuevo username ya existe
     connection.query(queryVerificar, [username, id], (error, results) => {
@@ -406,64 +645,56 @@ app.put('/change-password', (req, res) => {
         });
     }
 
-    console.log('📝 Cambiando de contrasena :', { id, pass });
+    console.log('📝 Cambiando contraseña:', { id });
 
     // Query para actualizar
-    const queryActualizar = `
-        UPDATE usuarios 
-        SET contrasena = ?
-        WHERE id = ?
-    `;
+    const queryActualizar = 'UPDATE usuarios SET contrasena = ? WHERE id = ?';
 
-
-        // 2. Si no está en uso, proceder con la actualización
-        connection.query(queryActualizar, [pass, id], (error, results) => {
-            if (error) {
-                console.error('❌ Error en query de actualización de contrasena :', error);
-                return res.json({ 
-                    success: false, 
-                    message: 'Error al cambiar la contrasena' 
-                });
-            }
-
-            // Verificar si se actualizó algún registro
-            if (results.affectedRows === 0) {
-                return res.json({ 
-                    success: false, 
-                    message: 'Usuario no encontrado' 
-                });
-            }
-
-            console.log('✅ pass cambiado exitosamente');
-            return res.json({ 
-                success: true, 
-                message: 'Tu contrasena ha sido cambiado con éxito',
-            });
-        });
-    });
-
-// Endpoint para actualizar foto de perfil en tu BD
-app.post('/change-profile-photo', async (req, res) => {
-        const { id, fotoUrl } = req.body;
-        
-        // Aquí tu lógica para actualizar en la base de datos
-        const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
-         connection.query(query, [fotoUrl, id], (error, results) => {
+    connection.query(queryActualizar, [pass, id], (error, results) => {
         if (error) {
-            console.error('❌ Error en query de verificación:', error);
+            console.error('❌ Error en query de actualización de contraseña:', error);
             return res.json({ 
                 success: false, 
-                message: 'Error verificando disponibilidad del username' 
+                message: 'Error al cambiar la contraseña' 
+            });
+        }
+
+        // Verificar si se actualizó algún registro
+        if (results.affectedRows === 0) {
+            return res.json({ 
+                success: false, 
+                message: 'Usuario no encontrado' 
+            });
+        }
+
+        console.log('✅ Contraseña cambiada exitosamente');
+        return res.json({ 
+            success: true, 
+            message: 'Tu contraseña ha sido cambiada con éxito',
+        });
+    });
+});
+
+// Endpoint para actualizar foto de perfil
+app.post('/change-profile-photo', async (req, res) => {
+    const { id, fotoUrl } = req.body;
+    
+    const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
+    connection.query(query, [fotoUrl, id], (error, results) => {
+        if (error) {
+            console.error('❌ Error actualizando foto:', error);
+            return res.json({ 
+                success: false, 
+                message: 'Error actualizando foto de perfil' 
             });
         }
 
         return res.json({
-            success: true
+            success: true,
+            message: 'Foto de perfil actualizada correctamente'
         });
+    });
 });
-
-});
-
 
 app.get('/imagekit-auth', (req, res) => {
     const ImageKit = require('imagekit');
@@ -478,25 +709,30 @@ app.get('/imagekit-auth', (req, res) => {
     res.send(authenticationParameters);
 });
 
+// 🔐 FUNCIONES DE ENCRIPCIÓN
 function encriptarSimple(texto) {
     let resultado = '';
     for (let i = 0; i < texto.length; i++) {
-
         resultado += String.fromCharCode(texto.charCodeAt(i) + 3);
     }
-    return btoa(resultado); // Lo convierte a Base64
+    return btoa(resultado);
 }
 
 function desencriptarSimple(textoEncriptado) {
     const textoBase64 = atob(textoEncriptado);
     let resultado = '';
     for (let i = 0; i < textoBase64.length; i++) {
-        // Regresa cada carácter 3 posiciones en ASCII
         resultado += String.fromCharCode(textoBase64.charCodeAt(i) - 3);
     }
     return resultado;
 }
 
+// 🚀 INICIAR SERVIDOR
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
+    console.log(`📧 Endpoint de email: http://localhost:${PORT}/api/email/send-verification`);
+    console.log(`🧪 Endpoint de prueba: http://localhost:${PORT}/api/email/test`);
+    
+    // Verificar configuración de email al iniciar
+    console.log('🔧 Verificando configuración de email...');
 });
