@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const verifyBtn = document.getElementById('verifyBtn');
     const resendBtn = document.getElementById('resendBtn');
     const verificationMessage = document.getElementById('verificationMessage');
-    const profilePhoto = document.getElementById('profilePhoto');
-    const imagePreview = document.getElementById('imagePreview');
     const submitBtn = document.getElementById('submitBtn');
     const btnText = submitBtn.querySelector('.btn-text');
     const btnLoading = submitBtn.querySelector('.btn-loading');
@@ -27,23 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    // Preview de imagen de perfil
-    profilePhoto.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB max
-                showMessage('La imagen debe ser menor a 5MB', 'error');
-                this.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    
 
     // Envío del formulario de registro
     registerForm.addEventListener('submit', async function(e) {
@@ -70,14 +52,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const valuetype = getSelectedUserType();
+
+        console.log(valuetype);
+
         // Preparar datos del usuario
         userData = {
             username: document.getElementById('username').value,
             email: document.getElementById('email').value,
-            password: password
+            password: password,
+            delivery: (valuetype == 'delivery')
         };
 
-        // Mostrar loading
+      
         showLoading(true);
 
         try {
@@ -167,6 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
             verifyBtn.click();
         }
     });
+  
 
     // ✅ NUEVA FUNCIÓN: Enviar código usando tu backend
     async function sendVerificationCode(userEmail) {
@@ -209,15 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     username: userData.username,
                     email: userData.email,
-                    password: userData.password
+                    password: userData.password,
+                    delivery: userData.delivery
                 })
             });
 
             const data = await response.json();
 
-            alert(data.message);
-
-           
+            alert(data.message);     
     }
 
     // Funciones auxiliares de UI
@@ -259,3 +246,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Focus automático en el primer input
     document.getElementById('username').focus();
 });
+
+function getUserType() {
+    const userTypeInput = document.getElementById('userType');
+    return userTypeInput ? userTypeInput.value : null;
+}
+
+ function obtenerTipoUsuario() {
+    return new Promise((resolve) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                configurarSeleccion(resolve);
+            });
+        } else {
+            configurarSeleccion(resolve);
+        }
+    });
+}
+
+function configurarSeleccion(resolve) {
+    document.querySelectorAll('.user-type-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const userType = this.getAttribute('data-value');
+            document.getElementById('userType').value = userType;
+            
+            document.querySelectorAll('.user-type-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            resolve(userType);
+        });
+    });
+}
+
+// USO:
+
+        function getSelectedUserType() {
+     return document.querySelector('input[name="userType"]:checked')?.value;
+}

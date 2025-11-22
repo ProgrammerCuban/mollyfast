@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuario</title>
     <link rel="stylesheet" href="register.css">
-    <!-- Agrega EmailJS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
@@ -64,26 +63,30 @@
                         >
                     </div>
 
-                    <!-- NUEVA SECCIÓN: Selección de Tipo de Usuario -->
+                    <!-- NUEVA IMPLEMENTACIÓN SIMPLIFICADA -->
                     <div class="input-group user-type-selection">
                         <label>Tipo de Usuario <span style="color: #f44336">*</span></label>
                         <div class="user-type-options">
-                            <div class="user-type-option" data-value="negocio" tabindex="0">
-                                <span class="user-type-icon">🏪</span>
-                                <div class="user-type-content">
+                            <label class="user-type-option">
+                                <input type="radio" name="userType" value="negocio" required>
+                                <span class="radio-custom"></span>
+                                <span class="user-type-content">
+                                    <span class="user-type-icon">🏪</span>
                                     <span class="user-type-label">Negocio</span>
                                     <span class="user-type-description">Ofrece tus productos o servicios a la comunidad</span>
-                                </div>
-                            </div>
-                            <div class="user-type-option" data-value="delivery" tabindex="0">
-                                <span class="user-type-icon">🚚</span>
-                                <div class="user-type-content">
+                                </span>
+                            </label>
+                            
+                            <label class="user-type-option">
+                                <input type="radio" name="userType" value="delivery" required>
+                                <span class="radio-custom"></span>
+                                <span class="user-type-content">
+                                    <span class="user-type-icon">🚚</span>
                                     <span class="user-type-label">Delivery</span>
                                     <span class="user-type-description">Realiza entregas y gana dinero con cada pedido</span>
-                                </div>
-                            </div>
+                                </span>
+                            </label>
                         </div>
-                        <input type="hidden" id="userType" name="userType" required>
                         <div class="error-message" id="userTypeError" style="display: none; color: #f44336; font-size: 12px; margin-top: 5px;">
                             Por favor, selecciona un tipo de usuario
                         </div>

@@ -56,6 +56,42 @@ async function obtenerid() {
     console.log(idbussines);
 }
 
+async function cambiarUsername(){
+    const newuser = document.getElementById('newUsername').value;
+
+    setLoading(true);
+
+   const response = await fetch('/change-username', {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ 
+                id: idbussines, 
+                username: newuser
+            })
+        });
+
+        const data = await response.json();
+
+        setLoading(false);
+
+        if(!data.success) 
+        {
+            console.error(data.mensaje);
+            alert("ha ocurrido un error por favor intente nuevamente");
+            return;
+        }
+        else
+        {
+            alert("nombre cambiado correctamente");
+            cerrarModal("usernameModal");
+            document.getElementById('usernameDisplay').textContent  = newuser;
+            usuario.usuario = newuser; 
+        }
+
+}
+
 async function obteneruser(){
     const respuesta = await fetch('/desencript',{
         method:'POST',
@@ -178,6 +214,7 @@ async function cambiarFoto() {
         console.log('✅ Imagen subida a ImageKit:', result.url);
 
 
+        setLoading(true);
 
         // Actualizar en tu base de datos
         const updateResponse = await fetch('/change-profile-photo', {
@@ -193,6 +230,9 @@ async function cambiarFoto() {
 
         const updateData = await updateResponse.json();
         
+
+            setLoading(false);
+
         if (updateData.success) {
             
             usuario.fotoperfil = result.url;
@@ -286,6 +326,8 @@ async function cambiarPassword() {
         return;
     }
 
+    setLoading(true);
+
     try {
         // PETICIÓN AL BACKEND
         const response = await fetch('/change-password', {
@@ -300,6 +342,7 @@ async function cambiarPassword() {
         });
 
         const data = await response.json();
+        setLoading(false);
 
         if(data.success) {
             alert("se ha cambiado la contrasena correctamente");
@@ -343,6 +386,50 @@ window.onclick = function(event) {
     for (let modal of modals) {
         if (event.target === modal) {
             modal.style.display = 'none';
+        }
+    }
+}
+
+function setLoading(show) {
+    if (show) {
+        // Crear y mostrar loading
+        const loadingHTML = `
+            <div id="simpleLoading" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            ">
+                <div style="
+                    width: 50px;
+                    height: 50px;
+                    border: 3px solid rgba(255,255,255,0.3);
+                    border-top: 3px solid #3498db;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        document.body.insertAdjacentHTML('beforeend', loadingHTML);
+        document.body.style.overflow = 'hidden';
+    } else {
+        // Ocultar loading
+        const loadingElement = document.getElementById('simpleLoading');
+        if (loadingElement) {
+            loadingElement.remove();
+            document.body.style.overflow = '';
         }
     }
 }

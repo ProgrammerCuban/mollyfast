@@ -94,7 +94,7 @@ body {
     color: #999;
 }
 
-/* ESTILOS MEJORADOS PARA LA SELECCIÓN DE TIPO DE USUARIO */
+/* ESTILOS MEJORADOS Y SIMPLIFICADOS PARA LA SELECCIÓN DE TIPO DE USUARIO */
 .user-type-selection {
     margin: 20px 0;
 }
@@ -118,12 +118,55 @@ body {
     background: #f8f9fa;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Ocultar el radio button nativo */
+.user-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Radio button personalizado */
+.radio-custom {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.user-type-option input[type="radio"]:checked + .radio-custom {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.user-type-option input[type="radio"]:checked + .radio-custom::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .user-type-option:hover {
     border-color: #667eea;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.user-type-option input[type="radio"]:checked ~ .user-type-content {
+    color: #667eea;
 }
 
 .user-type-option.selected {
@@ -133,26 +176,8 @@ body {
     transform: translateY(-2px);
 }
 
-/* Indicador de selección */
-.user-type-option.selected::before {
-    content: "✓";
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 20px;
-    height: 20px;
-    background: #667eea;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-}
-
 /* Efecto de pulso para la opción seleccionada */
-.user-type-option.selected::after {
+.user-type-option input[type="radio"]:checked ~ .user-type-content::before {
     content: "";
     position: absolute;
     top: -2px;
@@ -183,7 +208,7 @@ body {
     transition: transform 0.3s ease;
 }
 
-.user-type-option.selected .user-type-icon {
+.user-type-option input[type="radio"]:checked ~ .user-type-content .user-type-icon {
     transform: scale(1.1);
 }
 
@@ -195,7 +220,7 @@ body {
     font-size: 16px;
 }
 
-.user-type-option.selected .user-type-label {
+.user-type-option input[type="radio"]:checked ~ .user-type-content .user-type-label {
     color: #667eea;
 }
 
@@ -205,12 +230,12 @@ body {
     line-height: 1.4;
 }
 
-.user-type-option.selected .user-type-description {
+.user-type-option input[type="radio"]:checked ~ .user-type-content .user-type-description {
     color: #555;
 }
 
 /* Estados de foco para accesibilidad */
-.user-type-option:focus {
+.user-type-option:focus-within {
     outline: 2px solid #667eea;
     outline-offset: 2px;
 }
@@ -456,10 +481,10 @@ body {
         margin-bottom: 4px;
     }
     
-    .user-type-option.selected::before {
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
+    .radio-custom {
+        position: static;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 }
 
@@ -526,8 +551,22 @@ body {
         border-color: #667eea;
     }
     
+    .user-type-option input[type="radio"]:checked ~ .user-type-content {
+        color: #667eea;
+    }
+    
     .user-type-option.selected {
         background: linear-gradient(135deg, #4a5568, #667eea);
+        border-color: #667eea;
+    }
+    
+    .radio-custom {
+        background: #2d3748;
+        border-color: #a0aec0;
+    }
+    
+    .user-type-option input[type="radio"]:checked + .radio-custom {
+        background: #667eea;
         border-color: #667eea;
     }
     
@@ -535,7 +574,7 @@ body {
         color: white;
     }
     
-    .user-type-option.selected .user-type-label {
+    .user-type-option input[type="radio"]:checked ~ .user-type-content .user-type-label {
         color: white;
     }
     

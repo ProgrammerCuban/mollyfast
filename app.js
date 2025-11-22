@@ -351,7 +351,7 @@ app.post('/desencript', (req, res) => {
 });
 
 app.post('/api/register', (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, delivery } = req.body;
 
     // Primero verificar si el usuario ya existe
     const checkQuery = 'SELECT id FROM usuarios WHERE usuario = ? OR gmail = ?';
@@ -369,9 +369,9 @@ app.post('/api/register', (req, res) => {
             });
         }
         
-        // Insertar nuevo usuario
-        const insertQuery = 'INSERT INTO usuarios (usuario, contrasena, gmail, estado) VALUES (?, ?, ?, ?)';
-        connection.query(insertQuery, [username, password, email, 4], (error, results) => {
+        
+        const insertQuery = 'INSERT INTO usuarios (usuario, contrasena, gmail, estado, delivery) VALUES (?, ?, ?, ?, ?)';
+        connection.query(insertQuery, [username, password, email, 4, delivery], (error, results) => {
             if (error) {
                 console.error('Error registrando usuario:', error);
                 return res.json({ 
@@ -434,8 +434,17 @@ app.get('/viajes/:id', (req, res) => {
 
 // Ruta para guardar/actualizar viajes
 app.post('/guardar-viaje', (req, res) => {
-    const { id, propietario, precio, detalles } = req.body;
-    
+    const {id, propietario, precio, detalles, provincia_salida,municipio_salida, desde, provincia_llegada,hasta, municipio_llegada, fecha_salida } = req.body;
+
+    let fechaFormateada = fecha_salida;
+
+ if (fecha_salida && typeof fecha_salida === 'string') {
+    const fecha = new Date(fecha_salida);
+    if (!isNaN(fecha.getTime())) {
+        fechaFormateada = fecha.toISOString().split('T')[0];
+    }
+   } 
+
     // Verificar si el viaje existe
     const checkQuery = 'SELECT * FROM viajes WHERE id = ?';
     
@@ -447,8 +456,8 @@ app.post('/guardar-viaje', (req, res) => {
         
         if (results.length > 0) {
             // Actualizar viaje existente
-            const updateQuery = 'UPDATE viajes SET propietario = ?, precio = ?, detalles_adicionales = ? WHERE id = ?';
-            connection.query(updateQuery, [propietario, precio, detalles, id], (error) => {
+            const updateQuery = 'UPDATE viajes SET propietario = ?, precio = ?, detalles_adicionales = ?, provincia_salida = ?, municipio_salida = ?, desde= ?,provincia_llegada = ?, hasta = ?,municipio_llegada = ?, fecha_salida = ?     WHERE id = ?';
+            connection.query(updateQuery, [propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, hasta, fechaFormateada,  id], (error) => {
                 if (error) {
                     return res.json({ success: false, message: 'Error al actualizar' });
                 }
@@ -456,8 +465,8 @@ app.post('/guardar-viaje', (req, res) => {
             });
         } else {
             // Insertar nuevo viaje
-            const insertQuery = 'INSERT INTO viajes (propietario, precio, detalles_adicionales) VALUES (?, ?, ?)';
-            connection.query(insertQuery, [propietario, precio, detalles], (error) => {
+            const insertQuery = 'INSERT INTO viajes (propietario, precio, detalles_adicionales, desde, hasta, provincia_salida, municipio_salida, provincia_llegada, fecha_salida, municipio_llegada) VALUES (?, ?, ?, ? , ? , ? , ? , ? , ?, ?)';
+            connection.query(insertQuery, [propietario, precio, detalles, desde, hasta,provincia_salida, municipio_salida, provincia_llegada, fechaFormateada, municipio_llegada], (error) => {
                 if (error) {
                     return res.json({ success: false, message: 'Error al guardar' });
                 }
