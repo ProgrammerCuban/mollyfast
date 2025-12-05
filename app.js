@@ -7,10 +7,9 @@ const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const http = require('http');
 const socketIo = require('socket.io');
-const router = express.Router();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -20,7 +19,6 @@ const io = socketIo(server, {
     }
 });
 
-// 📊 CONEXIÓN A MYSQL CON PARÁMETROS SEPARADOS
 const connection = mysql.createConnection({
     host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com',
     user: 'ufywen8m7kyqrwjc',
@@ -32,7 +30,6 @@ const connection = mysql.createConnection({
     }
 });
 
-// 🗄️ CONFIGURACIÓN DE ALMACENAMIENTO DE SESIONES EN MYSQL
 const sessionStore = new MySQLStore({
     createDatabaseTable: true,
     schema: {
@@ -45,7 +42,6 @@ const sessionStore = new MySQLStore({
     }
 }, connection);
 
-// 🔌 VERIFICAR LA CONEXIÓN
 connection.connect((error) => {
     if (error) {
         console.log('❌ Error conectando a MySQL:', error.message);
@@ -54,10 +50,10 @@ connection.connect((error) => {
     }
 });
 
-// ✅ MIDDLEWARES PRIMERO
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 app.use(session({
     secret: 'C27PZXMv.@',
     resave: false,
@@ -69,9 +65,12 @@ app.use(session({
         httpOnly: true
     }
 }));
+
 app.use(express.static('public'));
 app.use(express.static('public/admin'));
-// 🎯 RUTAS DE LA APLICACIÓN
+
+// ======================= RUTAS EXISTENTES =======================
+
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/login/login.html'));
 });
@@ -83,32 +82,6 @@ app.get('/', (req, res) => {
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/admin/login/login.html'));
 });
-
-
-
-function createTransporter() {
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: {
-            user: 'mollyfast.delivery@gmail.com',
-            pass: 'cslp ihak xl ow plnv'
-        },
-        tls: {
-            rejectUnauthorized: false,
-            ciphers: 'SSLv3'
-        },
-        // ⚡ CONFIGURACIÓN DE CONEXIÓN MEJORADA
-        connectionTimeout: 30000,
-        greetingTimeout: 30000,
-        socketTimeout: 45000,
-        debug: false,
-        logger: false
-    });
-}
-
 
 app.get('/api/email/test', async(req, res) => {
     try {
@@ -136,6 +109,130 @@ app.get('/api/email/test', async(req, res) => {
     }
 });
 
+app.get('/check-session', (req, res) => {
+    if (req.session.userId) {
+        res.json({
+            success: true,
+            id: req.session.userId,
+            name: req.session.userName,
+            delivery: req.session.delivery,
+            sessionData: req.session
+        });
+    } else {
+        res.json({
+            success: false,
+            message: 'No hay sesión activa'
+        });
+    }
+});
+
+app.get('/viajes/:id', (req, res) => {
+    const id = req.params.id;
+    const query = 'SELECT * FROM viajes WHERE propietario = ?';
+
+    connection.query(query, [id], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, viaje: results });
+        } else {
+            return res.json({ success: false, message: 'Viaje no encontrado' });
+        }
+    });
+});
+
+app.get('/perfil/:id', (req, res) => {
+    const id = req.params.id;
+    const query = 'SELECT * FROM usuarios WHERE id = ?';
+
+    connection.query(query, [id], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, perfil: results });
+        } else {
+            return res.json({ success: false, message: 'perfil no encontrado' });
+        }
+    });
+});
+
+app.get('/viajes', async(req, res) => {
+    const query = `
+        SELECT 
+            id,
+            propietario,
+            precio,
+            detalles_adicionales,
+            desde,
+            hasta,
+            provincia_salida,
+            municipio_salida,
+            provincia_llegada,
+            municipio_llegada,
+            fecha_salida
+        FROM viajes 
+    `;
+
+    connection.query(query, (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query' });
+        }
+        if (results.length > 0) {
+            console.log("Viajes encontrados");
+            return res.json({ success: true, viajes: results });
+        } else {
+            console.log("No hay viajes");
+            return res.json({ success: false, message: 'Viajes no encontrados' });
+        }
+    });
+});
+
+app.get('/usuarios-id', async(req, res) => {
+    const query = 'SELECT id, usuario FROM usuarios';
+
+    connection.query(query, (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query' });
+        }
+        if (results.length > 0) {
+            console.log("Usuarios encontrados");
+            return res.json({ success: true, usuarios: results });
+        } else {
+            console.log("No hay usuarios");
+            return res.json({ success: false, message: 'Usuarios no encontrados' });
+        }
+    });
+});
+
+app.get('/api/get-solicitudes', async(req, res) => {
+    const query = 'SELECT carnet, fotocarnet, selfie, idowner, foto_moto FROM solicitudes';
+
+    connection.query(query, (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, usuarios: results });
+        } else {
+            return res.json({ success: false, message: 'no hay solicitudes' });
+        }
+    });
+});
+
+app.get('/imagekit-auth', (req, res) => {
+    const ImageKit = require('imagekit');
+
+    const imagekit = new ImageKit({
+        publicKey: "public_4yRUn/8HyM6NpBO2uluT5n374JY=",
+        privateKey: "private_KrZVMBlNMU+KuDRUG6uX2tshYRk=",
+        urlEndpoint: "https://ik.imagekit.io/yosvaC"
+    });
+
+    const authenticationParameters = imagekit.getAuthenticationParameters();
+    res.send(authenticationParameters);
+});
 
 app.post('/api/email/send-verification', async(req, res) => {
     console.log('📨 Solicitud recibida en /api/email/send-verification');
@@ -143,7 +240,6 @@ app.post('/api/email/send-verification', async(req, res) => {
     try {
         const { userEmail, userName } = req.body;
 
-        // Validaciones
         if (!userEmail || !userName) {
             console.log('❌ Datos incompletos:', { userEmail, userName });
             return res.status(400).json({
@@ -152,7 +248,6 @@ app.post('/api/email/send-verification', async(req, res) => {
             });
         }
 
-        // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(userEmail)) {
             return res.status(400).json({
@@ -166,7 +261,6 @@ app.post('/api/email/send-verification', async(req, res) => {
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(`🔐 Código generado: ${verificationCode}`);
 
-        // Intentar enviar el email con reintentos
         const result = await sendVerificationCode(userEmail, userName, verificationCode, 3);
 
         console.log(`🎉 Email enviado exitosamente después de ${result.attempt} intento(s)`);
@@ -181,7 +275,6 @@ app.post('/api/email/send-verification', async(req, res) => {
     } catch (error) {
         console.error('💥 Error crítico en endpoint:', error.message);
 
-        // Enviar respuesta de error específica
         let errorMessage = 'Error al enviar el código. Por favor, intenta nuevamente.';
         let statusCode = 500;
 
@@ -202,7 +295,6 @@ app.post('/api/email/send-verification', async(req, res) => {
 });
 
 app.post('/api/email/solicitud-aceptada', async(req, res) => {
-
     try {
         const { userEmail } = req.body;
 
@@ -233,7 +325,6 @@ app.post('/api/email/solicitud-aceptada', async(req, res) => {
     } catch (error) {
         console.error('💥 Error crítico en endpoint:', error.message);
 
-        // Enviar respuesta de error específica
         let errorMessage = 'Error al enviar el código. Por favor, intenta nuevamente.';
         let statusCode = 500;
 
@@ -249,34 +340,6 @@ app.post('/api/email/solicitud-aceptada', async(req, res) => {
             success: false,
             message: errorMessage,
             technicalError: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-});
-
-function requireAuth(req, res, next) {
-    if (req.session.userId) {
-        next();
-    } else {
-        res.status(401).json({
-            success: false,
-            message: 'No autorizado - Inicia sesión primero'
-        });
-    }
-}
-
-app.get('/check-session', (req, res) => {
-    if (req.session.userId) {
-        res.json({
-            success: true,
-            id: req.session.userId,
-            name: req.session.userName,
-            delivery: req.session.delivery,
-            sessionData: req.session
-        });
-    } else {
-        res.json({
-            success: false,
-            message: 'No hay sesión activa'
         });
     }
 });
@@ -341,7 +404,6 @@ app.post('/api/pass-admin', (req, res) => {
 app.post('/api/register', (req, res) => {
     const { username, email, password, delivery } = req.body;
 
-    // Primero verificar si el usuario ya existe
     const checkQuery = 'SELECT id FROM usuarios WHERE usuario = ? OR gmail = ?';
 
     connection.query(checkQuery, [username, email], (error, results) => {
@@ -356,7 +418,6 @@ app.post('/api/register', (req, res) => {
                 message: 'El usuario o email ya existen'
             });
         }
-
 
         const insertQuery = 'INSERT INTO usuarios (usuario, contrasena, gmail, estado, delivery) VALUES (?, ?, ?, ?, ?)';
         connection.query(insertQuery, [username, password, email, 4, delivery], (error, results) => {
@@ -431,39 +492,6 @@ app.post('/api/solicitud-idowner', (req, res) => {
     });
 });
 
-app.get('/viajes/:id', (req, res) => {
-    const id = req.params.id;
-    const query = 'SELECT * FROM viajes WHERE propietario = ?';
-
-    connection.query(query, [id], (error, results) => {
-        if (error) {
-            return res.json({ success: false, message: 'Error' });
-        }
-        if (results.length > 0) {
-            return res.json({ success: true, viaje: results });
-        } else {
-            return res.json({ success: false, message: 'Viaje no encontrado' });
-        }
-    });
-});
-
-app.get('/perfil/:id', (req, res) => {
-    const id = req.params.id;
-    const query = 'SELECT * FROM usuarios WHERE id = ?';
-
-    connection.query(query, [id], (error, results) => {
-        if (error) {
-            return res.json({ success: false, message: 'Error' });
-        }
-        if (results.length > 0) {
-            return res.json({ success: true, perfil: results });
-        } else {
-            return res.json({ success: false, message: 'perfil no encontrado' });
-        }
-    });
-});
-
-// Ruta para guardar/actualizar viajes
 app.post('/guardar-viaje', (req, res) => {
     const { id, propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, hasta, municipio_llegada, fecha_salida } = req.body;
 
@@ -476,7 +504,6 @@ app.post('/guardar-viaje', (req, res) => {
         }
     }
 
-    // Verificar si el viaje existe
     const checkQuery = 'SELECT * FROM viajes WHERE id = ?';
 
     connection.query(checkQuery, [id], (error, results) => {
@@ -486,16 +513,23 @@ app.post('/guardar-viaje', (req, res) => {
         }
 
         if (results.length > 0) {
-            // Actualizar viaje existente
-            const updateQuery = 'UPDATE viajes SET propietario = ?, precio = ?, detalles_adicionales = ?, provincia_salida = ?, municipio_salida = ?, desde= ?,provincia_llegada = ?, hasta = ?,municipio_llegada = ?, fecha_salida = ?     WHERE id = ?';
-            connection.query(updateQuery, [propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, hasta, fechaFormateada, id], (error) => {
-                if (error) {
-                    return res.json({ success: false, message: 'Error al actualizar' });
+            // FIX: incluir municipio_llegada y alinear orden de parámetros
+            const updateQuery = `
+                UPDATE viajes
+                SET propietario = ?, precio = ?, detalles_adicionales = ?, provincia_salida = ?, municipio_salida = ?, desde = ?, provincia_llegada = ?, municipio_llegada = ?, hasta = ?, fecha_salida = ?
+                WHERE id = ?
+            `;
+            connection.query(
+                updateQuery,
+                [propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, municipio_llegada, hasta, fechaFormateada, id],
+                (error) => {
+                    if (error) {
+                        return res.json({ success: false, message: 'Error al actualizar' });
+                    }
+                    res.json({ success: true, message: 'Viaje actualizado correctamente' });
                 }
-                res.json({ success: true, message: 'Viaje actualizado correctamente' });
-            });
+            );
         } else {
-            // Insertar nuevo viaje
             const insertQuery = 'INSERT INTO viajes (propietario, precio, detalles_adicionales, desde, hasta, provincia_salida, municipio_salida, provincia_llegada, fecha_salida, municipio_llegada) VALUES (?, ?, ?, ? , ? , ? , ? , ? , ?, ?)';
             connection.query(insertQuery, [propietario, precio, detalles, desde, hasta, provincia_salida, municipio_salida, provincia_llegada, fechaFormateada, municipio_llegada], (error) => {
                 if (error) {
@@ -532,7 +566,26 @@ app.post('/solicitud-aceptada', (req, res) => {
     });
 });
 
-// Ruta para eliminar viaje
+app.post('/change-profile-photo', async(req, res) => {
+    const { id, fotoUrl } = req.body;
+
+    const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
+    connection.query(query, [fotoUrl, id], (error, results) => {
+        if (error) {
+            console.error('❌ Error actualizando foto:', error);
+            return res.json({
+                success: false,
+                message: 'Error actualizando foto de perfil'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Foto de perfil actualizada correctamente'
+        });
+    });
+});
+
 app.delete('/eliminar-viaje/:id', (req, res) => {
     const idViaje = req.params.id;
 
@@ -591,75 +644,9 @@ app.delete('/eliminar-solicitud/:id', (req, res) => {
     });
 });
 
-app.get('/viajes', async(req, res) => {
-    const query = `
-        SELECT 
-            id,
-            propietario,
-            precio,
-            detalles_adicionales,
-            desde,
-            hasta,
-            provincia_salida,
-            municipio_salida,
-            provincia_llegada,
-            municipio_llegada,
-            fecha_salida
-        FROM viajes 
-    `;
-
-    connection.query(query, (error, results) => {
-        if (error) {
-            return res.json({ success: false, message: 'Error en la query' });
-        }
-        if (results.length > 0) {
-            console.log("Viajes encontrados");
-            return res.json({ success: true, viajes: results });
-        } else {
-            console.log("No hay viajes");
-            return res.json({ success: false, message: 'Viajes no encontrados' });
-        }
-    });
-});
-
-// Ruta para obtener diccionario de usuarios
-app.get('/usuarios-id', async(req, res) => {
-    const query = 'SELECT id, usuario FROM usuarios';
-
-    connection.query(query, (error, results) => {
-        if (error) {
-            return res.json({ success: false, message: 'Error en la query' });
-        }
-        if (results.length > 0) {
-            console.log("Usuarios encontrados");
-            return res.json({ success: true, usuarios: results });
-        } else {
-            console.log("No hay usuarios");
-            return res.json({ success: false, message: 'Usuarios no encontrados' });
-        }
-    });
-});
-
-app.get('/api/get-solicitudes', async(req, res) => {
-    const query = 'SELECT carnet, fotocarnet, selfie, idowner, foto_moto FROM solicitudes';
-
-    connection.query(query, (error, results) => {
-        if (error) {
-            return res.json({ success: false, message: 'Error en la query' });
-        }
-        if (results.length > 0) {
-            return res.json({ success: true, usuarios: results });
-        } else {
-            return res.json({ success: false, message: 'no hay solicitudes' });
-        }
-    });
-});
-
-
 app.put('/change-username', (req, res) => {
     const { id, username } = req.body;
 
-    // Validaciones básicas
     if (!id || !username) {
         return res.json({
             success: false,
@@ -669,13 +656,9 @@ app.put('/change-username', (req, res) => {
 
     console.log('📝 Cambiando username:', { id, username });
 
-    // Query para verificar si el NUEVO username ya existe en OTRO usuario
     const queryVerificar = 'SELECT id FROM usuarios WHERE usuario = ? AND id != ?';
-
-    // Query para actualizar
     const queryActualizar = 'UPDATE usuarios SET usuario = ? WHERE id = ?';
 
-    // 1. Primero verificar si el nuevo username ya existe
     connection.query(queryVerificar, [username, id], (error, results) => {
         if (error) {
             console.error('❌ Error en query de verificación:', error);
@@ -685,7 +668,6 @@ app.put('/change-username', (req, res) => {
             });
         }
 
-        // Si hay resultados, significa que el username ya está en uso
         if (results.length > 0) {
             console.log('❌ Username ya en uso:', username);
             return res.json({
@@ -694,7 +676,6 @@ app.put('/change-username', (req, res) => {
             });
         }
 
-        // 2. Si no está en uso, proceder con la actualización
         connection.query(queryActualizar, [username, id], (error, results) => {
             if (error) {
                 console.error('❌ Error en query de actualización:', error);
@@ -704,7 +685,6 @@ app.put('/change-username', (req, res) => {
                 });
             }
 
-            // Verificar si se actualizó algún registro
             if (results.affectedRows === 0) {
                 return res.json({
                     success: false,
@@ -725,7 +705,6 @@ app.put('/change-username', (req, res) => {
 app.put('/change-password', (req, res) => {
     const { id, pass } = req.body;
 
-    // Validaciones básicas
     if (!id || !pass) {
         return res.json({
             success: false,
@@ -735,7 +714,6 @@ app.put('/change-password', (req, res) => {
 
     console.log('📝 Cambiando contraseña:', { id });
 
-    // Query para actualizar
     const queryActualizar = 'UPDATE usuarios SET contrasena = ? WHERE id = ?';
 
     connection.query(queryActualizar, [pass, id], (error, results) => {
@@ -747,7 +725,6 @@ app.put('/change-password', (req, res) => {
             });
         }
 
-        // Verificar si se actualizó algún registro
         if (results.affectedRows === 0) {
             return res.json({
                 success: false,
@@ -763,51 +740,18 @@ app.put('/change-password', (req, res) => {
     });
 });
 
-// Endpoint para actualizar foto de perfil
-app.post('/change-profile-photo', async(req, res) => {
-    const { id, fotoUrl } = req.body;
+// ======================= UTILIDADES =======================
 
-    const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
-    connection.query(query, [fotoUrl, id], (error, results) => {
-        if (error) {
-            console.error('❌ Error actualizando foto:', error);
-            return res.json({
-                success: false,
-                message: 'Error actualizando foto de perfil'
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: 'Foto de perfil actualizada correctamente'
-        });
-    });
-});
-
-app.get('/imagekit-auth', (req, res) => {
-    const ImageKit = require('imagekit');
-
-    const imagekit = new ImageKit({
-        publicKey: "public_4yRUn/8HyM6NpBO2uluT5n374JY=",
-        privateKey: "private_KrZVMBlNMU+KuDRUG6uX2tshYRk=",
-        urlEndpoint: "https://ik.imagekit.io/yosvaC"
-    });
-
-    const authenticationParameters = imagekit.getAuthenticationParameters();
-    res.send(authenticationParameters);
-});
-
-// 🔐 FUNCIONES DE ENCRIPCIÓN
 function encriptarSimple(texto) {
     let resultado = '';
     for (let i = 0; i < texto.length; i++) {
         resultado += String.fromCharCode(texto.charCodeAt(i) + 3);
     }
-    return btoa(resultado);
+    return Buffer.from(resultado, 'binary').toString('base64');
 }
 
 function desencriptarSimple(textoEncriptado) {
-    const textoBase64 = atob(textoEncriptado);
+    const textoBase64 = Buffer.from(textoEncriptado, 'base64').toString('binary');
     let resultado = '';
     for (let i = 0; i < textoBase64.length; i++) {
         resultado += String.fromCharCode(textoBase64.charCodeAt(i) - 3);
@@ -815,60 +759,213 @@ function desencriptarSimple(textoEncriptado) {
     return resultado;
 }
 
-// ==============================================
-// 🚀 SISTEMA DE CHAT EN TIEMPO REAL - SOCKET.IO
-// ==============================================
+function requireAuth(req, res, next) {
+    if (req.session && req.session.userId) {
+        next();
+    } else {
+        res.status(401).json({
+            success: false,
+            message: 'No autorizado - Inicia sesión primero'
+        });
+    }
+}
 
-// Almacenar usuarios conectados
+// ======================= CHAT: CONVERSACIONES Y MENSAJES =======================
+
+// Crear/obtener conversación según (delivery_request_id, client_id, delivery_id)
+async function getOrCreateConversation(deliveryRequestId, clientId, deliveryId) {
+    const [rows] = await connection.promise().execute(
+        'SELECT id FROM conversations WHERE delivery_request_id = ? AND client_id = ? AND delivery_id = ?',
+        [deliveryRequestId, clientId, deliveryId]
+    );
+    if (rows.length > 0) {
+        return rows[0].id;
+    }
+    const [result] = await connection.promise().execute(
+        'INSERT INTO conversations (delivery_request_id, client_id, delivery_id) VALUES (?, ?, ?)',
+        [deliveryRequestId, clientId, deliveryId]
+    );
+    return result.insertId;
+}
+
+// Endpoint: crear/obtener conversación (para abrir chat desde el botón del viaje)
+app.post('/api/conversations/get-or-create', async (req, res) => {
+    try {
+        const { deliveryRequestId, clientId, deliveryId } = req.body;
+        if (!deliveryRequestId || !clientId || !deliveryId) {
+            return res.json({ success: false, message: 'Datos incompletos' });
+        }
+        const conversationId = await getOrCreateConversation(deliveryRequestId, clientId, deliveryId);
+        return res.json({ success: true, conversationId });
+    } catch (err) {
+        console.error('❌ Error get-or-create:', err);
+        return res.json({ success: false, message: 'No se pudo crear/obtener la conversación' });
+    }
+});
+
+// Endpoint: historial de mensajes de una conversación
+app.get('/api/conversations/:id/messages', async (req, res) => {
+    try {
+        const conversationId = req.params.id;
+        const [rows] = await connection.promise().execute(
+            `SELECT m.id, m.conversation_id, m.sender_id, m.message, m.is_read, m.created_at,
+                    u.usuario AS sender_name
+             FROM messages m
+             JOIN usuarios u ON m.sender_id = u.id
+             WHERE m.conversation_id = ?
+             ORDER BY m.created_at ASC`,
+            [conversationId]
+        );
+        return res.json({ success: true, messages: rows });
+    } catch (err) {
+        console.error('❌ Error cargando historial:', err);
+        return res.json({ success: false, message: 'No se pudo cargar el historial' });
+    }
+});
+
+// Endpoint: listar conversaciones de un usuario (client o delivery)
+app.get('/api/conversations/by-user/:userId', async (req, res) => {
+    try {
+        const userId = Number(req.params.userId);
+        const [rows] = await connection.promise().execute(
+            `SELECT c.id AS conversation_id, c.delivery_request_id, c.client_id, c.delivery_id,
+                    c.created_at, c.updated_at,
+                    uc.usuario AS client_name, ud.usuario AS delivery_name
+             FROM conversations c
+             JOIN usuarios uc ON c.client_id = uc.id
+             JOIN usuarios ud ON c.delivery_id = ud.id
+             WHERE c.client_id = ? OR c.delivery_id = ?
+             ORDER BY c.updated_at DESC`,
+            [userId, userId]
+        );
+        return res.json({ success: true, conversations: rows });
+    } catch (err) {
+        console.error('❌ Error listando conversaciones:', err);
+        return res.json({ success: false, message: 'No se pudieron listar las conversaciones' });
+    }
+});
+
+// Endpoint: listar conversaciones por viaje (para negocio)
+app.get('/api/conversations/by-trip/:tripId', async (req, res) => {
+    try {
+        const tripId = Number(req.params.tripId);
+        const [rows] = await connection.promise().execute(
+            `SELECT c.id AS conversation_id, c.delivery_id, u.usuario AS delivery_name,
+                    c.client_id, c.delivery_request_id, c.updated_at,
+                    (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id) AS messages_count,
+                    (SELECT MAX(m.created_at) FROM messages m WHERE m.conversation_id = c.id) AS last_message_at
+             FROM conversations c
+             JOIN usuarios u ON c.delivery_id = u.id
+             WHERE c.delivery_request_id = ?
+             ORDER BY last_message_at DESC`,
+            [tripId]
+        );
+        return res.json({ success: true, deliveries: rows });
+    } catch (err) {
+        console.error('❌ Error listando deliveries por viaje:', err);
+        return res.json({ success: false, message: 'No se pudieron listar las conversaciones' });
+    }
+});
+
+// Endpoint: contador de mensajes por viaje
+app.get('/api/messages/count-by-trip/:tripId', async (req, res) => {
+    try {
+        const tripId = Number(req.params.tripId);
+        const [rows] = await connection.promise().execute(
+            `SELECT COUNT(m.id) AS total_messages
+             FROM messages m
+             JOIN conversations c ON m.conversation_id = c.id
+             WHERE c.delivery_request_id = ?`,
+            [tripId]
+        );
+        return res.json({ success: true, total: rows[0]?.total_messages || 0 });
+    } catch (err) {
+        console.error('❌ Error contando mensajes por viaje:', err);
+        return res.json({ success: false, message: 'No se pudo contar los mensajes' });
+    }
+});
+
+// Endpoint: marcar mensaje como leído
+app.patch('/api/messages/:id/read', async (req, res) => {
+    try {
+        const messageId = req.params.id;
+        const [result] = await connection.promise().execute(
+            'UPDATE messages SET is_read = TRUE WHERE id = ?',
+            [messageId]
+        );
+        if (result.affectedRows > 0) {
+            return res.json({ success: true });
+        } else {
+            return res.json({ success: false, message: 'Mensaje no encontrado' });
+        }
+    } catch (err) {
+        console.error('❌ Error marcando leído:', err);
+        return res.json({ success: false, message: 'No se pudo marcar como leído' });
+    }
+});
+
+// ======================= SOCKET.IO CHAT =======================
+
 const activeUsers = new Map();
 
 io.on('connection', (socket) => {
     console.log('✅ Usuario conectado al chat:', socket.id);
 
-    // Unirse a una conversación específica
-    socket.on('join_conversation', async(data) => {
+    // Unirse a una conversación específica (room)
+    socket.on('join_conversation', async (data) => {
         const { conversationId, userId } = data;
-
-        socket.join(conversationId);
-        activeUsers.set(userId, socket.id);
-
-        console.log(`💬 Usuario ${userId} unido a conversación ${conversationId}`);
+        const room = String(conversationId);
+        socket.join(room);
+        if (userId) {
+            activeUsers.set(userId, socket.id);
+        }
+        console.log(`💬 Usuario ${userId} unido a conversación ${room}`);
     });
 
-    // Manejar envío de mensajes
-    socket.on('send_message', async(data) => {
+    // Enviar mensaje dentro de una conversación
+    socket.on('send_message', async (data) => {
         const { conversationId, senderId, message } = data;
 
+        if (!conversationId || !senderId || !message || String(message).trim() === '') {
+            socket.emit('message_error', { error: 'Datos de mensaje incompletos' });
+            return;
+        }
+
         try {
-            // Guardar mensaje en la base de datos
+            // Guardar mensaje en DB
             const [result] = await connection.promise().execute(
-                'INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)', [conversationId, senderId, message]
+                'INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)',
+                [conversationId, senderId, message]
             );
 
-            // Obtener datos completos del mensaje
+            // Recuperar mensaje con metadatos y nombre del emisor
             const [messages] = await connection.promise().execute(
                 `SELECT m.*, u.usuario as sender_name 
                  FROM messages m 
                  JOIN usuarios u ON m.sender_id = u.id 
-                 WHERE m.id = ?`, [result.insertId]
+                 WHERE m.id = ?`,
+                [result.insertId]
             );
 
-            // Emitir mensaje a todos en la conversación
-            io.to(conversationId.toString()).emit('new_message', messages[0]);
+            // Emitir a todos en la sala
+            io.to(String(conversationId)).emit('new_message', messages[0]);
+
+            // Actualizar updated_at de la conversación
+            await connection.promise().execute(
+                'UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                [conversationId]
+            );
 
             console.log(`📨 Mensaje enviado en conversación ${conversationId} por usuario ${senderId}`);
-
         } catch (error) {
             console.error('❌ Error enviando mensaje:', error);
             socket.emit('message_error', { error: 'No se pudo enviar el mensaje' });
         }
     });
 
-    // Manejar desconexión
     socket.on('disconnect', () => {
         console.log('❌ Usuario desconectado:', socket.id);
 
-        // Eliminar de usuarios activos
         for (let [userId, socketId] of activeUsers.entries()) {
             if (socketId === socket.id) {
                 activeUsers.delete(userId);
@@ -878,15 +975,16 @@ io.on('connection', (socket) => {
     });
 });
 
-// 🚀 INICIAR SERVIDOR
-app.listen(PORT, '0.0.0.0', () => {
+// ======================= SERVIDOR =======================
+
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
     console.log(`📧 Endpoint de email: http://localhost:${PORT}/api/email/send-verification`);
     console.log(`🧪 Endpoint de prueba: http://localhost:${PORT}/api/email/test`);
-
-    // Verificar configuración de email al iniciar
     console.log('🔧 Verificando configuración de email...');
 });
+
+// ======================= EMAIL =======================
 
 async function sendVerificationCode(userEmail, userName, verificationCode, maxRetries = 3) {
     let lastError = null;
@@ -897,10 +995,8 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
         try {
             console.log(`📧 Intento ${attempt}/${maxRetries} para ${userEmail}`);
 
-            // Crear NUEVA instancia del transporter para cada intento
             transporter = createTransporter();
 
-            // Verificar conexión con timeout
             const verifyPromise = transporter.verify();
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout en verificación')), 10000)
@@ -909,7 +1005,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
             await Promise.race([verifyPromise, timeoutPromise]);
             console.log('✅ Conexión SMTP verificada');
 
-            // Configurar opciones del email
             const mailOptions = {
                 from: '"MolyFats" <mollyfast.delivery@gmail.com>',
                 to: userEmail,
@@ -932,7 +1027,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
                 `
             };
 
-            // Enviar email con timeout
             const sendPromise = transporter.sendMail(mailOptions);
             const sendTimeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout en envío')), 15000)
@@ -942,7 +1036,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
 
             console.log(`✅ Email enviado exitosamente en intento ${attempt}`);
 
-            // Cerrar conexión explícitamente
             if (transporter) {
                 transporter.close();
             }
@@ -957,7 +1050,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
             lastError = error;
             console.error(`❌ Intento ${attempt} fallido:`, error.message);
 
-            // Cerrar conexión si existe
             if (transporter) {
                 try {
                     transporter.close();
@@ -966,7 +1058,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
                 }
             }
 
-            // Si no es el último intento, esperar con backoff exponencial
             if (attempt < maxRetries) {
                 const backoffTime = Math.pow(2, attempt) * 1000;
                 console.log(`⏳ Esperando ${backoffTime/1000} segundos antes del reintento...`);
@@ -975,7 +1066,6 @@ async function sendVerificationCode(userEmail, userName, verificationCode, maxRe
         }
     }
 
-    // Si llegamos aquí, todos los intentos fallaron
     throw new Error(`Todos los ${maxRetries} intentos fallaron. Último error: ${lastError.message}`);
 }
 
@@ -986,11 +1076,8 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
         let transporter = null;
 
         try {
-
-            // Crear NUEVA instancia del transporter para cada intento
             transporter = createTransporter();
 
-            // Verificar conexión con timeout
             const verifyPromise = transporter.verify();
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout en verificación')), 10000)
@@ -999,7 +1086,6 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
             await Promise.race([verifyPromise, timeoutPromise]);
             console.log('✅ Conexión SMTP verificada');
 
-            // Configurar opciones del email
             const mailOptions = {
                 from: '"MolyFats" <mollyfast.delivery@gmail.com>',
                 to: userEmail,
@@ -1073,7 +1159,6 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
                 `
             };
 
-            // Enviar email con timeout
             const sendPromise = transporter.sendMail(mailOptions);
             const sendTimeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout en envío')), 15000)
@@ -1081,9 +1166,6 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
 
             const result = await Promise.race([sendPromise, sendTimeoutPromise]);
 
-            console.log(`✅ Email enviado exitosamente en intento ${attempt}`);
-
-            // Cerrar conexión explícitamente
             if (transporter) {
                 transporter.close();
             }
@@ -1098,7 +1180,6 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
             lastError = error;
             console.error(`❌ Intento ${attempt} fallido:`, error.message);
 
-            // Cerrar conexión si existe
             if (transporter) {
                 try {
                     transporter.close();
@@ -1107,7 +1188,6 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
                 }
             }
 
-            // Si no es el último intento, esperar con backoff exponencial
             if (attempt < maxRetries) {
                 const backoffTime = Math.pow(2, attempt) * 1000;
                 console.log(`⏳ Esperando ${backoffTime/1000} segundos antes del reintento...`);
@@ -1115,7 +1195,27 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
             }
         }
     }
-
-    // Si llegamos aquí, todos los intentos fallaron
     throw new Error(`Todos los ${maxRetries} intentos fallaron. Último error: ${lastError.message}`);
+}
+
+function createTransporter() {
+    return nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: {
+            user: 'mollyfast.delivery@gmail.com',
+            pass: 'cslp ihak xl ow plnv'
+        },
+        tls: {
+            rejectUnauthorized: false,
+            ciphers: 'SSLv3'
+        },
+        connectionTimeout: 30000,
+        greetingTimeout: 30000,
+        socketTimeout: 45000,
+        debug: false,
+        logger: false
+    });
 }

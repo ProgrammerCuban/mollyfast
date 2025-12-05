@@ -1,8 +1,7 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* ========== Reset y base ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
 
 body {
     font-family: 'Arial', sans-serif;
@@ -29,7 +28,76 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* ===== ESTILOS PARA LISTA DE VIAJES ===== */
+/* ========== Header y perfil ========== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+}
+
+.profile-header {
+    position: absolute;
+    top: 20px;
+    right: 70px;
+    z-index: 1000;
+}
+
+.profile-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.profile-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    border-color: #764ba2;
+}
+
+.profile-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ========== Botón agregar ========== */
+.btn-agregar {
+    background: linear-gradient(135deg, #e74c3c, #e67e22);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.btn-agregar:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    background: linear-gradient(135deg, #c0392b, #d35400);
+}
+
+.btn-agregar:active { transform: scale(0.95); }
+
+/* ========== Lista de viajes ========== */
 .viajes-lista {
     display: flex;
     flex-direction: column;
@@ -63,11 +131,7 @@ h1 {
     gap: 15px;
 }
 
-.viaje-id {
-    color: #7f8c8d;
-    font-size: clamp(0.8rem, 3vw, 0.95rem);
-    font-weight: 500;
-}
+.viaje-id { color: #7f8c8d; font-size: clamp(0.8rem, 3vw, 0.95rem); font-weight: 500; }
 
 .viaje-precio {
     background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -81,7 +145,7 @@ h1 {
     white-space: nowrap;
 }
 
-/* Sección de ruta */
+/* Ruta entre origen y destino */
 .viaje-ruta {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -94,17 +158,10 @@ h1 {
     position: relative;
 }
 
-.ruta-origen, .ruta-destino {
-    padding: 10px;
-}
+.ruta-origen, .ruta-destino { padding: 10px; }
 
-.ruta-origen {
-    text-align: left;
-}
-
-.ruta-destino {
-    text-align: right;
-}
+.ruta-origen { text-align: left; }
+.ruta-destino { text-align: right; }
 
 .ruta-origen strong, .ruta-destino strong {
     display: block;
@@ -113,13 +170,8 @@ h1 {
     margin-bottom: 5px;
 }
 
-.ubicacion-detalle {
-    color: #7f8c8d;
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-    margin-top: 3px;
-}
+.ubicacion-detalle { color: #7f8c8d; font-size: clamp(0.75rem, 2.5vw, 0.85rem); margin-top: 3px; }
 
-/* Flecha entre origen y destino */
 .viaje-ruta::before {
     content: "→";
     font-size: clamp(1.2rem, 4vw, 1.8rem);
@@ -135,7 +187,7 @@ h1 {
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
-/* Estilos para la fecha */
+/* Fecha del viaje */
 .viaje-fecha {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
@@ -147,10 +199,7 @@ h1 {
     font-size: clamp(0.85rem, 3vw, 1rem);
     box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
 }
-
-.viaje-fecha strong {
-    color: #ecf0f1;
-}
+.viaje-fecha strong { color: #ecf0f1; }
 
 .viaje-propietario {
     color: #7f8c8d;
@@ -159,71 +208,35 @@ h1 {
     margin-bottom: 15px;
 }
 
+/* Detalles del viaje */
 .viaje-detalles {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid #ecf0f1;
 }
-
 .viaje-detalles h4 {
     color: #2c3e50;
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     margin-bottom: 8px;
 }
-
 .viaje-detalles p {
     color: #34495e;
     font-size: clamp(0.85rem, 3vw, 1rem);
     line-height: 1.5;
 }
 
-/* ===== ESTILOS PARA BOTONES ===== */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 20px;
-    position: relative;
-}
-
-.btn-agregar {
-    background: linear-gradient(135deg, #e74c3c, #e67e22);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.btn-agregar:hover {
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
-    background: linear-gradient(135deg, #c0392b, #d35400);
-}
-
-.btn-agregar:active {
-    transform: scale(0.95);
-}
-
-/* Botón eliminar */
+/* Acciones del viaje (eliminar y chat) */
 .viaje-acciones {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid #ecf0f1;
-    text-align: right;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
+/* Botón eliminar */
 .btn-eliminar {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
@@ -242,19 +255,30 @@ h1 {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
 }
-
-.btn-eliminar:active {
-    transform: translateY(0);
-}
-
+.btn-eliminar:active { transform: translateY(0); }
 .btn-eliminar:disabled {
-    background: #95a5a6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+    background: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none;
 }
 
-/* ===== ESTILOS PARA EL FORMULARIO ===== */
+/* Botón contador de mensajes */
+.btn-chat-counter {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 3px 10px rgba(118, 75, 162, 0.3);
+}
+.btn-chat-counter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+}
+
+/* ========== Formulario de nuevo viaje ========== */
 .formulario-container {
     background: rgba(255, 255, 255, 0.98);
     border-radius: 20px;
@@ -266,18 +290,10 @@ h1 {
     animation: slideInUp 0.4s ease-out;
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
-
 @keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 .formulario-container h2 {
     color: #2c3e50;
     margin-bottom: 25px;
@@ -290,18 +306,9 @@ h1 {
     background-clip: text;
 }
 
-.formulario-viaje {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+.formulario-viaje { display: flex; flex-direction: column; gap: 20px; }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-}
-
+.form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label {
     font-weight: 600;
     margin-bottom: 8px;
@@ -311,12 +318,7 @@ h1 {
     align-items: center;
     gap: 5px;
 }
-
-.form-group label::after {
-    content: "*";
-    color: #e74c3c;
-    font-size: 1.2em;
-}
+.form-group label::after { content: "*"; color: #e74c3c; font-size: 1.2em; }
 
 .form-group input,
 .form-group textarea,
@@ -341,25 +343,11 @@ h1 {
     transform: translateY(-2px);
 }
 
-.form-group textarea {
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.5;
-}
+.form-group textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
 
-/* Estilos para grupos de campos en línea */
-.form-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
+.form-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1 1 calc(50% - 10px); min-width: 250px; }
 
-.form-row .form-group {
-    flex: 1 1 calc(50% - 10px);
-    min-width: 250px;
-}
-
-/* Secciones del formulario */
 .form-section {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     padding: 25px;
@@ -368,11 +356,7 @@ h1 {
     margin-bottom: 25px;
     transition: transform 0.3s ease;
 }
-
-.form-section:hover {
-    transform: translateX(5px);
-}
-
+.form-section:hover { transform: translateX(5px); }
 .form-section h3 {
     color: #2c3e50;
     margin-bottom: 20px;
@@ -382,26 +366,10 @@ h1 {
     gap: 12px;
     font-weight: 600;
 }
+.section-origen h3::before { content: "🚀"; font-size: 1.3em; filter: grayscale(0.3); }
+.section-destino h3::before { content: "🎯"; font-size: 1.3em; filter: grayscale(0.3); }
+.section-datos h3::before { content: "💰"; font-size: 1.3em; filter: grayscale(0.3); }
 
-.section-origen h3::before {
-    content: "🚀";
-    font-size: 1.3em;
-    filter: grayscale(0.3);
-}
-
-.section-destino h3::before {
-    content: "🎯";
-    font-size: 1.3em;
-    filter: grayscale(0.3);
-}
-
-.section-datos h3::before {
-    content: "💰";
-    font-size: 1.3em;
-    filter: grayscale(0.3);
-}
-
-/* Botones del formulario */
 .botones-form {
     display: flex;
     gap: 20px;
@@ -428,28 +396,21 @@ h1 {
     position: relative;
     overflow: hidden;
 }
-
 .btn::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
     transition: left 0.5s;
 }
-
-.btn:hover::before {
-    left: 100%;
-}
+.btn:hover::before { left: 100%; }
 
 .btn-primary {
     background: linear-gradient(135deg, #27ae60, #2ecc71);
     color: white;
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
 }
-
 .btn-primary:hover {
     background: linear-gradient(135deg, #219a52, #27ae60);
     transform: translateY(-4px) scale(1.02);
@@ -461,7 +422,6 @@ h1 {
     color: white;
     box-shadow: 0 8px 25px rgba(149, 165, 166, 0.3);
 }
-
 .btn-secondary:hover {
     background: linear-gradient(135deg, #7f8c8d, #95a5a6);
     transform: translateY(-4px) scale(1.02);
@@ -476,474 +436,295 @@ h1 {
     box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.15);
     animation: shake 0.5s ease-in-out;
 }
-
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
 }
-
 .error-message {
     color: #e74c3c;
     font-size: clamp(0.75rem, 2.5vw, 0.85rem);
     margin-top: 5px;
     display: none;
 }
-
-.form-group.error .error-message {
-    display: block;
-}
+.form-group.error .error-message { display: block; }
 
 /* Loading state */
-.btn-loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
+.btn-loading { opacity: 0.7; pointer-events: none; }
 .btn-loading::after {
     content: "";
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     border: 2px solid transparent;
     border-top: 2px solid white;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    margin-left: 8px;
 }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Selectores deshabilitados */
 select:disabled {
     background-color: #f5f5f5;
     color: #999;
     cursor: not-allowed;
 }
 
-/* ===== PERFIL DE USUARIO ===== */
-.profile-header {
-    position: absolute;
-    top: 20px;
-    right: 70px;
-    z-index: 1000;
+/* ========== Modales: lista de deliverys y chat ========== */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 10000;
+    padding: 10px;
 }
 
-.profile-circle {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    overflow: hidden;
-    cursor: pointer;
-    border: 3px solid #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    transition: all 0.3s ease;
-    background: #f8f9fa;
-}
-
-.profile-circle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    border-color: #764ba2;
-}
-
-.profile-circle img {
+.modal-dialog {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-width: 700px;
+    background: rgba(255,255,255,0.98);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.35);
+    display: flex; flex-direction: column;
+    max-height: 85vh;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+.modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #ecf0f1;
+}
 
+.modal-header h3 { font-weight: 700; color: #2c3e50; }
+.modal-close { border: none; background: transparent; font-size: 1.4rem; cursor: pointer; }
+
+.modal-body { padding: 12px 16px; overflow-y: auto; }
+
+/* Lista de deliverys */
+.delivery-list { display: flex; flex-direction: column; gap: 10px; }
+
+.delivery-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #f8f9fa;
+    border-radius: 10px; padding: 12px;
+    border-left: 5px solid #667eea;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+.delivery-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.delivery-info { display: flex; flex-direction: column; gap: 4px; }
+.delivery-name { font-weight: 700; color: #2c3e50; }
+.delivery-meta { font-size: 0.85rem; color: #7f8c8d; }
+.delivery-open {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 8px 12px; cursor: pointer; font-weight: 600;
+}
+
+/* Chat modal */
+.chat-dialog { max-width: 800px; }
+
+.chat-body { padding: 0 0 10px 0; }
+.chat-messages {
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    height: 50vh; overflow-y: auto; background: #f5f7fb;
+}
+
+.msg { display: flex; }
+.msg-bubble {
+    max-width: 80%;
+    padding: 10px 12px; border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.msg-other { justify-content: flex-start; }
+.msg-other .msg-bubble {
+    background: #ffffff;
+    border: 1px solid #ecf0f1;
+}
+
+.msg-mine { justify-content: flex-end; }
+.msg-mine .msg-bubble {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+}
+
+.msg-text { white-space: pre-wrap; word-break: break-word; }
+.msg-meta { margin-top: 6px; font-size: 0.75rem; opacity: 0.85; }
+
+/* Footer chat */
+.modal-footer {
+    display: flex; gap: 10px; padding: 12px 14px;
+    border-top: 1px solid #ecf0f1;
+}
+.chat-input {
+    flex: 1; padding: 12px;
+    border: 2px solid #e1e8ed; border-radius: 10px;
+    font-size: 1rem;
+}
+.chat-input:focus {
+    outline: none; border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+.chat-send {
+    padding: 10px 16px; border-radius: 10px;
+    border: none; font-weight: 700; cursor: pointer;
+    background: linear-gradient(135deg, #3498db, #2980b9); color: #fff;
+    box-shadow: 0 6px 16px rgba(52,152,219,0.28);
+}
+.chat-send:hover { transform: translateY(-1px); }
+
+/* Mensajes vacíos y estados */
+.empty-row {
+    background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; color: #7f8c8d;
+}
+
+/* ========== Responsivo ========== */
 /* Tablets */
 @media (max-width: 768px) {
-    body {
-        padding: 5px;
-    }
-    
-    .container {
-        padding: 10px;
-        max-width: 600px;
-    }
-    
-    .viajes-lista {
-        gap: 20px;
-    }
-    
-    .viaje-card {
-        padding: 20px;
-        border-radius: 12px;
-    }
-    
-    .viaje-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .viaje-precio {
-        align-self: flex-start;
-    }
-    
+    body { padding: 5px; }
+    .container { padding: 10px; max-width: 600px; }
+
+    .viajes-lista { gap: 20px; }
+    .viaje-card { padding: 20px; border-radius: 12px; }
+
+    .header { justify-content: center; text-align: center; flex-direction: column; }
+    .btn-agregar { order: -1; }
+
+    .viaje-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .viaje-precio { align-self: flex-start; }
+
     .viaje-ruta {
         grid-template-columns: 1fr;
-        gap: 10px;
-        text-align: center;
+        gap: 10px; text-align: center;
     }
-    
-    .ruta-origen, .ruta-destino {
-        text-align: center;
-        padding: 8px;
-    }
-    
+    .ruta-origen, .ruta-destino { text-align: center; padding: 8px; }
     .viaje-ruta::before {
         content: "↓";
-        position: relative;
-        left: auto;
-        top: auto;
-        transform: none;
-        margin: 5px 0;
+        position: relative; left: auto; top: auto;
+        transform: none; margin: 5px 0;
     }
-    
-    /* Formulario en tablets */
-    .formulario-container {
-        padding: 20px;
-        margin: 15px auto;
-    }
-    
-    .form-row {
-        gap: 15px;
-    }
-    
-    .form-row .form-group {
-        flex: 1 1 100%;
-        min-width: auto;
-    }
-    
-    .form-section {
-        padding: 20px;
-    }
-    
-    .botones-form {
-        gap: 15px;
-    }
-    
-    .profile-header {
-        top: 15px;
-        right: 60px;
-    }
-    
-    .profile-circle {
-        width: 45px;
-        height: 45px;
-        border-width: 2px;
-    }
+
+    .formulario-container { padding: 20px; margin: 15px auto; }
+    .form-row { gap: 15px; }
+    .form-row .form-group { flex: 1 1 100%; min-width: auto; }
+    .form-section { padding: 20px; }
+    .botones-form { gap: 15px; }
+
+    .profile-header { top: 15px; right: 60px; }
+    .profile-circle { width: 45px; height: 45px; border-width: 2px; }
+
+    .modal-dialog { max-width: 95vw; }
+    .chat-messages { height: 55vh; }
+    .msg-bubble { max-width: 90%; }
 }
 
 /* Mobile */
 @media (max-width: 480px) {
-    body {
-        padding: 5px;
-    }
-    
-    .container {
-        padding: 8px;
-        max-width: 100%;
-    }
-    
-    .viajes-lista {
-        gap: 15px;
-    }
-    
-    .viaje-card {
-        padding: 15px;
-        border-radius: 10px;
-    }
-    
+    body { padding: 5px; }
+    .container { padding: 8px; max-width: 100%; }
+
+    .viajes-lista { gap: 15px; }
+    .viaje-card { padding: 15px; border-radius: 10px; }
+
     .viaje-header {
         flex-direction: column;
-        gap: 8px;
-        margin-bottom: 12px;
-        padding-bottom: 12px;
+        gap: 8px; margin-bottom: 12px; padding-bottom: 12px;
     }
-    
-    .viaje-precio {
-        font-size: 1.1rem;
-        padding: 8px 16px;
-        align-self: flex-start;
-    }
-    
-    .viaje-ruta {
-        padding: 10px;
-        gap: 8px;
-    }
-    
-    .ruta-origen strong, .ruta-destino strong {
-        font-size: 0.9rem;
-    }
-    
-    .ubicacion-detalle {
-        font-size: 0.75rem;
-    }
-    
-    .viaje-fecha {
-        padding: 8px 12px;
-        font-size: 0.85rem;
-    }
-    
-    h1 {
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-        padding: 0 10px;
-    }
-    
-    .btn-agregar {
-        width: 55px;
-        height: 55px;
-        font-size: 1.8rem;
-    }
-    
-    /* Formulario en móviles */
-    .formulario-container {
-        padding: 15px;
-        margin: 10px auto;
-        border-radius: 15px;
-    }
-    
-    .formulario-viaje {
-        gap: 15px;
-    }
-    
-    .form-section {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
+    .viaje-precio { font-size: 1.1rem; padding: 8px 16px; align-self: flex-start; }
+
+    .viaje-ruta { padding: 10px; gap: 8px; }
+    .ruta-origen strong, .ruta-destino strong { font-size: 0.9rem; }
+    .ubicacion-detalle { font-size: 0.75rem; }
+    .viaje-fecha { padding: 8px 12px; font-size: 0.85rem; }
+
+    h1 { font-size: 1.8rem; margin-bottom: 20px; padding: 0 10px; }
+    .btn-agregar { width: 55px; height: 55px; font-size: 1.8rem; }
+
+    .formulario-container { padding: 15px; margin: 10px auto; border-radius: 15px; }
+    .formulario-viaje { gap: 15px; }
+    .form-section { padding: 15px; margin-bottom: 20px; }
     .form-group input,
     .form-group textarea,
-    .form-group select {
-        padding: 14px 16px;
-        min-height: 50px;
-    }
-    
-    .botones-form {
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 20px;
-    }
-    
-    .btn {
-        width: 100%;
-        padding: 16px 24px;
-    }
-    
-    .profile-header {
-        top: 10px;
-        right: 50px;
-    }
-    
-    .profile-circle {
-        width: 40px;
-        height: 40px;
-    }
+    .form-group select { padding: 14px 16px; min-height: 50px; }
+
+    .botones-form { flex-direction: column; gap: 12px; margin-top: 20px; }
+    .btn { width: 100%; padding: 16px 24px; }
+
+    .profile-header { top: 10px; right: 50px; }
+    .profile-circle { width: 40px; height: 40px; }
+
+    .modal-dialog { max-width: 98vw; }
+    .chat-messages { height: 60vh; }
+    .delivery-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .delivery-open { align-self: flex-end; }
 }
 
 /* Pantallas muy pequeñas */
 @media (max-width: 360px) {
-    .viaje-card {
-        padding: 12px;
-    }
-    
-    .viaje-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .viaje-precio {
-        font-size: 1rem;
-        padding: 6px 12px;
-    }
-    
-    .viaje-ruta {
-        padding: 8px;
-    }
-    
-    h1 {
-        font-size: 1.5rem;
-    }
-    
-    .btn-agregar {
-        width: 50px;
-        height: 50px;
-        font-size: 1.6rem;
-    }
-    
-    .formulario-container {
-        padding: 12px;
-    }
-    
-    .form-section {
-        padding: 12px;
-    }
+    .viaje-card { padding: 12px; }
+    .viaje-header h2 { font-size: 1.1rem; }
+    .viaje-precio { font-size: 1rem; padding: 6px 12px; }
+    .viaje-ruta { padding: 8px; }
+    h1 { font-size: 1.5rem; }
+    .btn-agregar { width: 50px; height: 50px; font-size: 1.6rem; }
+
+    .formulario-container { padding: 12px; }
+    .form-section { padding: 12px; }
 }
 
-/* Ajustes para orientación landscape en móviles */
+/* Landscape y alto reducido */
 @media (max-height: 500px) and (orientation: landscape) {
-    .container {
-        padding: 10px;
-    }
-    
-    .viaje-card {
-        padding: 15px;
-    }
-    
-    h1 {
-        margin-bottom: 20px;
-        font-size: 2rem;
-    }
-    
-    .viajes-lista {
-        gap: 15px;
-    }
-    
-    .viaje-ruta {
-        grid-template-columns: 1fr auto 1fr;
-        padding: 10px;
-    }
-    
+    .container { padding: 10px; }
+    .viaje-card { padding: 15px; }
+    h1 { margin-bottom: 20px; font-size: 2rem; }
+    .viajes-lista { gap: 15px; }
+    .viaje-ruta { grid-template-columns: 1fr auto 1fr; padding: 10px; }
     .viaje-ruta::before {
         content: "→";
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     }
-    
-    .formulario-container {
-        margin: 10px auto;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
+    .formulario-container { margin: 10px auto; max-height: 90vh; overflow-y: auto; }
 }
 
-/* Responsive para botones */
+/* Responsive para botones en móviles */
 @media (max-width: 480px) {
-    .viaje-acciones {
-        text-align: center;
-    }
-    
-    .btn-eliminar {
-        width: 100%;
-        padding: 12px;
-    }
+    .viaje-acciones { justify-content: center; }
+    .btn-eliminar, .btn-chat-counter { width: 100%; padding: 12px; }
 }
 
-@media (max-width: 768px) {
-    .header {
-        justify-content: center;
-        text-align: center;
-        flex-direction: column;
-    }
-    
-    .btn-agregar {
-        order: -1;
-    }
-}
-
-/* Soporte para modo oscuro */
+/* ========== Modo oscuro coherente ========== */
 @media (prefers-color-scheme: dark) {
-    .viaje-card {
-        background: rgba(45, 45, 45, 0.95);
-        color: #ffffff;
+    .viaje-card { background: rgba(45, 45, 45, 0.95); color: #ffffff; }
+    .viaje-ruta { background: linear-gradient(135deg, #2d3748, #4a5568); }
+    .ruta-origen strong, .ruta-destino strong { color: #ffffff; }
+    .ubicacion-detalle { color: #cbd5e0; }
+    .viaje-detalles h4 { color: #ffffff; }
+    .viaje-detalles p { color: #e0e0e0; }
+
+    .formulario-container { background: rgba(45, 45, 45, 0.95); color: #ffffff; }
+    .form-group input, .form-group textarea, .form-group select {
+        background: #2d3748; border-color: #4a5568; color: #ffffff;
     }
-    
-    .viaje-ruta {
-        background: linear-gradient(135deg, #2d3748, #4a5568);
-    }
-    
-    .ruta-origen strong, .ruta-destino strong {
-        color: #ffffff;
-    }
-    
-    .ubicacion-detalle {
-        color: #cbd5e0;
-    }
-    
-    .viaje-detalles h4 {
-        color: #ffffff;
-    }
-    
-    .viaje-detalles p {
-        color: #e0e0e0;
-    }
-    
-    /* Formulario en modo oscuro */
-    .formulario-container {
-        background: rgba(45, 45, 45, 0.95);
-        color: #ffffff;
-    }
-    
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        background: #2d3748;
-        border-color: #4a5568;
-        color: #ffffff;
-    }
-    
-    .form-section {
-        background: linear-gradient(135deg, #2d3748, #4a5568);
-    }
-    
-    .form-group label {
-        color: #e2e8f0;
-    }
+    .form-section { background: linear-gradient(135deg, #2d3748, #4a5568); }
+    .form-group label { color: #e2e8f0; }
+
+    .modal-dialog { background: rgba(45,45,45,0.98); color: #fff; border-color: #555; }
+    .modal-header { border-bottom-color: #555; }
+    .modal-body { color: #eee; }
+    .delivery-row { background: #2d3748; border-left-color: #667eea; }
+    .delivery-name { color: #fff; }
+    .delivery-meta { color: #cbd5e0; }
+
+    .chat-messages { background: #2d3748; }
+    .msg-other .msg-bubble { background: #374151; border-color: #444; color: #eee; }
+    .chat-input { background: #374151; border-color: #555; color: #fff; }
+    .modal-footer { border-top-color: #555; }
 }
 
-/* Mejoras de accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-    .viaje-card, .btn-agregar, .btn-eliminar, .btn, .form-section {
-        transition: none;
-    }
-    
-    .viaje-card:hover, .btn-agregar:hover, .btn-eliminar:hover, .btn:hover, .form-section:hover {
-        transform: none;
-    }
-    
-    .btn::before {
-        display: none;
-    }
-}
-
-/* Estados de foco para accesibilidad */
-.btn:focus,
-.btn-agregar:focus,
-.btn-eliminar:focus,
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    outline: 2px solid #3498db;
-    outline-offset: 2px;
-}
-
-/* Mejora de contraste para textos */
-@media (max-width: 480px) {
-    .viaje-precio,
-    .viaje-fecha {
-        font-weight: 700;
-    }
-}
-
-/* Ajustes para impresión */
-@media print {
-    .btn-agregar,
-    .btn-eliminar,
-    .profile-header {
-        display: none;
-    }
-    
-    .viaje-card {
-        box-shadow: none;
-        border: 1px solid #ccc;
-    }
-}
+/* ========== Accesibilidad y

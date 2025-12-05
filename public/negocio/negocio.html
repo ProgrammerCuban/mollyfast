@@ -10,25 +10,19 @@
     <div class="container">
         <div class="header">
             <h1>Tus viajes</h1>
-            
-            <!-- Botón de perfil del usuario -->
             <div class="profile-header">
                 <div class="profile-circle" onclick="irAlPerfil()" title="Mi Perfil">
                     <img id="profileHeaderImage" src="" alt="Foto de perfil">
                 </div>
             </div>
-            
-            <button class="btn-agregar" onclick="irAFormulario()" title="Agregar nuevo viaje">
-                +
-            </button>
+            <button class="btn-agregar" onclick="irAFormulario()" title="Agregar nuevo viaje">+</button>
         </div>
-        
-        <!-- 📌 CONTENEDOR VACÍO - Los viajes se agregarán aquí -->
-        <div id="viajes-lista" class="viajes-lista">
-            <!-- Los viajes se cargarán aquí automáticamente desde JavaScript -->
-        </div>
+
+        <div id="viajes-lista" class="viajes-lista"></div>
     </div>
-    
+
+    <!-- Cliente de Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="negocio.js"></script>
 </body>
 </html>
