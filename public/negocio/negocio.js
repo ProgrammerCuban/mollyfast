@@ -3,11 +3,7 @@ let namebussines = "";
 let idbussines = "";
 let usurio;
 let active = true;
-
-// Socket.IO cliente
 let socket = null;
-
-// Estado de UI del chat
 let currentTripId = null;
 let currentConversationId = null;
 let currentChatDeliveryId = null;
@@ -314,7 +310,7 @@ function sendChatMessage() {
         message: text
     });
     // Optimista: pintar mi mensaje
-    renderMessage({ message: text, created_at: new Date().toISOString(), sender_name: namebussines, conversation_id: currentConversationId, sender_id: idbussines }, true);
+   // renderMessage({ message: text, created_at: new Date().toISOString(), sender_name: namebussines, conversation_id: currentConversationId, sender_id: idbussines }, true);
     input.value = '';
     actualizarContadorTrip(currentTripId);
 }

@@ -189,25 +189,17 @@ async function loadConversationMessages(conversationId) {
 
 // Enviar mensaje
 function sendChatMessage() {
-    const text = chatInput.value.trim();
-    if (!text || !currentConversationId) return;
-
+    const input = document.getElementById('chatInput');
+    const text = String(input.value || '').trim();
+    if (!text) return;
     socket.emit('send_message', {
         conversationId: currentConversationId,
         senderId: idbussines,
         message: text
     });
-
-    // Pinta optimista del mensaje
-    renderMessage({
-        sender_id: idbussines,
-        message: text,
-        created_at: new Date().toISOString()
-    });
-
-    chatInput.value = '';
-    chatInput.focus();
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Optimista: pintar mi mensaje
+   // renderMessage({ message: text, created_at: new Date().toISOString(), sender_name: namebussines, conversation_id: currentConversationId, sender_id: idbussines }, true);
+    input.value = '';
 }
 
 // Renderizar mensaje en el UI
