@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Solicitudes</title>
+    <link rel="stylesheet" href="solicitudes.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Solicitudes Pendientes</h1>
+            <div class="header-stats">
+                <span id="totalSolicitudes">0 solicitudes</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando solicitudes...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <p id="errorText"></p>
+                <button onclick="cargarSolicitudes()">Reintentar</button>
+            </div>
+
+            <div class="solicitudes-container" id="solicitudesContainer">
+                <!-- Las solicitudes se cargarán aquí dinámicamente -->
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24'%3E%3Cpath fill='%23ccc' d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'/%3E%3C/svg%3E" alt="Sin solicitudes">
+                <h3>No hay solicitudes pendientes</h3>
+                <p>Todas las solicitudes han sido procesadas</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="solicitudes.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activación de Cuenta</title>
+    <link rel="stylesheet" href="active.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Activación de Tu Cuenta</h1>
+            <p>Completa los siguientes pasos para activar tu cuenta</p>
+        </div>
+
+        <form id="activationForm" class="form">
+            <!-- Paso 1: Información Personal -->
+            <div class="form-section">
+                <h2>📋 Información Personal</h2>
+                
+                <div class="form-group">
+                    <label for="identityNumber">Número de Identidad *</label>
+                    <input 
+                        type="text" 
+                        id="identityNumber" 
+                        name="identityNumber" 
+                        placeholder="Ingresa tu número de identidad"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Paso 2: Documento de Identidad -->
+            <div class="form-section">
+                <h2>🆔 Documento de Identidad</h2>
+                
+                <div class="form-group">
+                    <label for="idDocument">Foto del Documento de Identidad *</label>
+                    <div class="file-upload">
+                        <input 
+                            type="file" 
+                            id="idDocument" 
+                            name="idDocument" 
+                            accept="image/*"
+                            required
+                        >
+                        <div class="upload-area" id="idDocumentArea">
+                            <span class="upload-icon">📄</span>
+                            <p>Haz clic o arrastra tu documento de identidad</p>
+                            <small>Formatos: JPG, PNG, PDF (Máx. 5MB)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 3: Selfie con Documento -->
+            <div class="form-section">
+                <h2>📸 Selfie con Documento</h2>
+                
+                <div class="form-group">
+                    <label for="selfieWithId">Selfie sosteniendo tu documento *</label>
+                    <div class="file-upload">
+                        <input 
+                            type="file" 
+                            id="selfieWithId" 
+                            name="selfieWithId" 
+                            accept="image/*"
+                            required
+                        >
+                        <div class="upload-area" id="selfieArea">
+                            <span class="upload-icon">🤳</span>
+                            <p>Haz clic o arrastra tu selfie con el documento</p>
+                            <small>Asegúrate de que tu rostro y el documento sean visibles</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 4: Foto de la Moto -->
+            <div class="form-section">
+                <h2>🏍️ Foto de la Moto</h2>
+                
+                <div class="form-group">
+                    <label for="motoPhoto">Foto de la moto a utilizar *</label>
+                    <div class="file-upload">
+                        <input 
+                            type="file" 
+                            id="motoPhoto" 
+                            name="motoPhoto" 
+                            accept="image/*"
+                            required
+                        >
+                        <div class="upload-area" id="motoArea">
+                            <span class="upload-icon">🏍️</span>
+                            <p>Haz clic o arrastra la foto de tu moto</p>
+                            <small>Debe mostrar claramente la moto completa</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de Envío -->
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">
+                    🚀 Activar Cuenta
+                </button>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Procesando tu solicitud...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h2>✅ ¡Cuenta Activada Exitosamente!</h2>
+            <p>Tu cuenta ha sido activada. Serás redirigido automáticamente.</p>
+        </div>
+    </div>
+        <script src="https://unpkg.com/imagekit-javascript@1.5.4/dist/imagekit.min.js"></script>
+    <script src="active.js"></script>
+</body>
+</html>

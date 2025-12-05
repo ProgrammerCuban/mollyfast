@@ -1,10 +1,9 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresar Contraseña</title>
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="login/login.css">
 </head>
 <body>
     <div class="password-container">
@@ -29,7 +28,7 @@
                     </button>
                 </div>
                 
-                <button type="submit" class="submit-btn" id="submitBtn">
+                <button type="button" onclick="confirmpass()" class="submit-btn" id="submitBtn">
                     <span class="btn-text">Continuar</span>
                     <span class="btn-loading" style="display: none;">⏳</span>
                 </button>
@@ -39,6 +38,6 @@
         </div>
     </div>
 
-    <script src="password.js"></script>
+    <script src="login/login.js"></script>
 </body>
 </html>

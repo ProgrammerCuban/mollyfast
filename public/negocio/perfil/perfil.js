@@ -18,15 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // TU CÓDIGO ORIGINAL (NO MODIFICADO)
 async function inicial(){
+    setLoading(true);
     await obteneruser();
     await obtenerid();
     await cargarperfil();
+    setLoading(false);
     await mostrarDatosEnPantalla(); // NUEVA FUNCIÓN
 }
 
 async function cargarperfil() {
-    console.log(namebussines);
-    console.log(idbussines);
+
     const respuesta = await fetch(`/perfil/${idbussines}`);
     const data = await respuesta.json();
     
@@ -40,7 +41,7 @@ async function cargarperfil() {
 }
 
 async function obtenerid() {
-    console.log(namebussines);
+
     const respuestaid = await fetch('/obtenerid',{
         method:'POST',
         headers: {
@@ -52,7 +53,9 @@ async function obtenerid() {
     });
 
     const datosid = await respuestaid.json();
-    idbussines = datosid.id;
+
+
+    idbussines = datosid.id.id;
     console.log(idbussines);
 }
 
@@ -433,3 +436,5 @@ function setLoading(show) {
         }
     }
 }
+
+

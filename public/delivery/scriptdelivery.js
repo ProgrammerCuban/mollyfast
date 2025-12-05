@@ -38,9 +38,7 @@ let viajes = [];
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    cargarViajes();
-    
-    // Event listeners
+  // Event listeners
     filterPrice.addEventListener('change', filtrarViajes);
     refreshBtn.addEventListener('click', cargarViajes);
 });
@@ -86,7 +84,6 @@ function mostrarViajes(viajesArray) {
     viajesGrid.innerHTML = '';
 
     viajesArray.forEach(viaje => {
-        console.log(viaje);
         const viajeCard = crearTarjetaViaje(viaje);
         viajesGrid.appendChild(viajeCard);
     });
@@ -205,7 +202,7 @@ async function obtenerid() {
 
 
     const datosid = await respuestaid.json();
-    idbussines = datosid.id;
+    idbussines = datosid.id.id;
     console.log(idbussines);
 }
 
@@ -225,12 +222,10 @@ async function obteneruser(){
 }
 
 async function cargarFotoPerfil() {
-
     await obteneruser();
     await obtenerid();
-    console.log(namebussines);
-    console.log(idbussines);
-    console.log(codigo);
+    await isactive();
+    await cargarViajes();
 
     const respuesta = await fetch(`/perfil/${idbussines}`);
     
@@ -246,6 +241,30 @@ async function cargarFotoPerfil() {
     else
     {
         console.error(data.message);
+    }
+
+}
+
+async function isactive() 
+{
+      const respuestaid = await fetch('/obtenerid', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            user: namebussines
+        })
+    });
+
+    const datosid = await respuestaid.json();
+    
+   estado = datosid.id.estado;
+
+    if(estado == 4)
+    {
+        active = false;
+        window.location.href = `active/active.html#${codigo}`;
     }
 
 }

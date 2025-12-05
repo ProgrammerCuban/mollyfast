@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     userEmail: userEmail,
-                    userName: userData.username
+                    userName: userData.username,
                     // El código se genera en el backend por seguridad
                 })
             });

@@ -2,6 +2,7 @@ const codigo = window.location.hash.substring(1);
 let namebussines = "";
 let idbussines = "";
 let usurio;
+const active = true;
 
 async function inicial() {
     await obteneruser();
@@ -9,6 +10,8 @@ async function inicial() {
     await cargarviajes();
     await cargarFotoPerfil();
 }
+
+
 
 async function cargarFotoPerfil() {
     const respuesta = await fetch(`/perfil/${idbussines}`);
@@ -43,7 +46,7 @@ async function obteneruser() {
 }
 
 async function obtenerid() {
-    console.log(namebussines);
+   // console.log(namebussines);
     const respuestaid = await fetch('/obtenerid', {
         method: 'POST',
         headers: {
@@ -55,7 +58,7 @@ async function obtenerid() {
     });
 
     const datosid = await respuestaid.json();
-    idbussines = datosid.id;
+    idbussines = datosid.id.id;
     console.log(idbussines);
 }
 
