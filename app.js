@@ -1092,8 +1092,8 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
                 subject: ' Cuenta creada exitosamente - MollyFast',
                 html: `
                     <!DOCTYPE html>
-<html lang="es">
-<head>
+ <html lang="es">
+ <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido a MollyFast</title>
@@ -1135,8 +1135,8 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
             margin-bottom: 10px;
         }
     </style>
-</head>
-<body>
+ < /head>
+ <body>
     <div class="container">
         <div class="header">
             <div class="logo">MollyFast</div>
@@ -1154,8 +1154,8 @@ async function sendconfitmationaccount(userEmail, maxRetries = 3) {
             <p>Este es un mensaje automático, por favor no responda a este correo.</p>
         </div>
     </div>
-</body>
-</html>
+   </body>
+  </html>
                 `
             };
 

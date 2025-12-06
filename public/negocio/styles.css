@@ -529,6 +529,29 @@ body {
     transition: transform 0.1s ease;
 }
 
+/* Avatar en la lista de conversaciones */
+.delivery-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.delivery-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delivery-avatar img:hover {
+    transform: scale(1.08);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .btn-eliminar.shake {
     animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
@@ -638,6 +661,21 @@ body {
         transform: translateY(0) scale(1);
     }
 }
+
+.msg-avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.msg-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
 
 /* Header de modal */
 .modal-header {

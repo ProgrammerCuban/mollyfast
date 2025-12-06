@@ -1,7 +1,7 @@
 const codigo = window.location.hash.substring(1);
 let namebussines = "";
 let idbussines = "";
-let usurio;
+let usuariocompleto;
 let active = true;
 let socket = null;
 let currentTripId = null;
@@ -72,6 +72,8 @@ async function obtenerid() {
     });
     const datosid = await respuestaid.json();
     idbussines = datosid.id.id;
+    usuariocompleto = datosid;
+    
 }
 
 async function cargarviajes() {
@@ -160,7 +162,7 @@ async function abrirListaDeliverys(tripId) {
         const data = await res.json();
         setLoading(false);
         if (data.success) {
-            renderModalDeliverys(data.deliveries || []);
+           await renderModalDeliverys(data.deliveries || []);
             await actualizarContadorTrip(tripId);
         } else {
             alert(data.message || 'No se pudo cargar la lista de interesados');
@@ -172,7 +174,7 @@ async function abrirListaDeliverys(tripId) {
     }
 }
 
-function renderModalDeliverys(deliveries) {
+async function renderModalDeliverys(deliveries) {
     // Crear modal si no existe
     let modal = document.getElementById('deliveryListModal');
     if (!modal) {
@@ -200,13 +202,46 @@ function renderModalDeliverys(deliveries) {
         list.innerHTML = `<div class="empty-row">No hay mensajes aún para este viaje.</div>`;
     } else {
         for (const d of deliveries) {
+
+          const respuesta = await fetch('/encript',{
+           method:'POST',
+          headers:{
+           'Content-Type': 'application/json',
+           },
+             body:JSON.stringify({
+           user: d.delivery_name
+           })
+           });
+
+           const datacode = await respuesta.json();
+
+            const profileUrl = `../ver-perfil/ver-perfil.html#${datacode.coder}`;
+
+            const answerfoto = await fetch(`/perfil/${d.delivery_id}`);
+
+            const datafoto = await answerfoto.json();
+
+            let fotop = "";
+
+            if(datafoto.success)
+            {
+                fotop = datafoto.perfil[0].fotoperfil;
+            }
+            
             const row = `
-                <div class="delivery-row" onclick="abrirChatConDelivery(${d.conversation_id}, ${d.delivery_id}, '${escapeHtml(d.delivery_name)}')">
-                    <div class="delivery-info">
-                        <div class="delivery-name">🚚 ${escapeHtml(d.delivery_name)}</div>
-                        <div class="delivery-meta">Mensajes: ${d.messages_count} • Último: ${d.last_message_at ? new Date(d.last_message_at).toLocaleString() : '—'}</div>
+                <div class="delivery-row">
+                    <div class="delivery-info" style="display: flex; align-items: center; gap: 12px;">
+                        <div class="delivery-avatar">
+                            <a href="${profileUrl}" target="_blank" title="Ver perfil de ${escapeHtml(d.delivery_name)}">
+                                <img src="${fotop || 'default-avatar.png'}" alt="${escapeHtml(d.delivery_name)}">
+                            </a>
+                        </div>
+                        <div>
+                            <div class="delivery-name">🚚 ${escapeHtml(d.delivery_name)}</div>
+                            <div class="delivery-meta">Mensajes: ${d.messages_count} • Último: ${d.last_message_at ? new Date(d.last_message_at).toLocaleString() : '—'}</div>
+                        </div>
                     </div>
-                    <button class="delivery-open">Abrir chat</button>
+                    <button class="delivery-open" onclick="abrirChatConDelivery(${d.conversation_id}, ${d.delivery_id}, '${escapeHtml(d.delivery_name)}')">Abrir chat</button>
                 </div>
             `;
             list.insertAdjacentHTML('beforeend', row);
@@ -215,7 +250,6 @@ function renderModalDeliverys(deliveries) {
 
     modal.style.display = 'flex';
 }
-
 function cerrarDeliveryModal() {
     const modal = document.getElementById('deliveryListModal');
     if (modal) modal.style.display = 'none';
@@ -290,10 +324,21 @@ function renderMessage(m, isMine) {
     if (!cont) return;
     const row = document.createElement('div');
     row.className = `msg ${isMine ? 'msg-mine' : 'msg-other'}`;
+    
+    // URL AQUÍ: Reemplaza "/perfil/perfil.html" con la página a la que quieres redirigir
+    const profileUrl = `/perfil/perfil.html#${m.sender_id}`;
+    
     row.innerHTML = `
         <div class="msg-bubble">
-            <div class="msg-text">${escapeHtml(m.message)}</div>
-            <div class="msg-meta">${new Date(m.created_at).toLocaleString()} • ${escapeHtml(m.sender_name || '')}</div>
+            <div class="msg-avatar">
+                <a href="${profileUrl}" target="_blank" title="Ver perfil">
+                    <img src="${m.profile_picture || usuariocompleto.fotoperfil || 'default-avatar.png'}" alt="${escapeHtml(m.sender_name || 'Usuario')}">
+                </a>
+            </div>
+            <div class="msg-content">
+                <div class="msg-text">${escapeHtml(m.message)}</div>
+                <div class="msg-meta">${new Date(m.created_at).toLocaleString()} • ${escapeHtml(m.sender_name || '')}</div>
+            </div>
         </div>
     `;
     cont.appendChild(row);
@@ -310,7 +355,15 @@ function sendChatMessage() {
         message: text
     });
     // Optimista: pintar mi mensaje
-   // renderMessage({ message: text, created_at: new Date().toISOString(), sender_name: namebussines, conversation_id: currentConversationId, sender_id: idbussines }, true);
+    const message = {
+        message: text, 
+        created_at: new Date().toISOString(), 
+        sender_name: namebussines, 
+        conversation_id: currentConversationId, 
+        sender_id: idbussines,
+        profile_picture: usuariocompleto.fotoperfil || ''
+    };
+    renderMessage(message, true);
     input.value = '';
     actualizarContadorTrip(currentTripId);
 }

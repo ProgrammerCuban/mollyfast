@@ -80,7 +80,6 @@ async function cargarViajes() {
 
         if (data.success) {
             viajes = data.viajes;
-            mostrarViajes(viajes);
         } else {
             throw new Error(data.message || 'Error al cargar los viajes');
         }
@@ -88,6 +87,20 @@ async function cargarViajes() {
         console.error('Error:', error);
         mostrarError(error.message);
     }
+
+    let filtroviajes = [];
+
+    const misviajes = await obtenermisviajes();
+
+    viajes.forEach(element => {
+        if(!misviajes.includes(element.id))
+        {
+            filtroviajes.push(element);
+        }
+    });
+
+    mostrarViajes(filtroviajes);
+
 }
 
 function mostrarViajes(viajesArray) {

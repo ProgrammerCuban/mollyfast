@@ -3,5 +3,10 @@
         "activityBar.background": "#000000",
         "titleBar.activeBackground": "#000000",
         "titleBar.activeForeground": "#F6FDF3"
-    }
+    },
+    "editor.folding": true,
+    "editor.foldingStrategy": "indentation",
+    "editor.foldingImportsByDefault": true,
+    "editor.foldingMaximumRegions": 5000,
+    "editor.showFoldingControls": "mouseover"
 }
