@@ -197,7 +197,7 @@ async function cambiarFoto() {
 
         const updateData = await updateResponse.json();
 
-        setLoading(fale);
+        setLoading(false);
         
         if (updateData.success) {
             

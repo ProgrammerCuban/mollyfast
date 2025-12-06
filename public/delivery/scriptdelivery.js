@@ -21,6 +21,13 @@ const errorTextElement = document.getElementById('errorText');
 const filterPrice = document.getElementById('filterPrice');
 const refreshBtn = document.getElementById('refreshBtn');
 
+// Referencias para MIS VIAJES
+const misViajesGrid = document.getElementById('misViajesGrid');
+const loadingMisViajesElement = document.getElementById('loadingMisViajes');
+const noMisViajesElement = document.getElementById('noMisViajes');
+const errorMisViajesElement = document.getElementById('errorMisViajes');
+const errorMisViajesTextElement = document.getElementById('errorMisViajesText');
+
 // Modal chat refs
 const chatModal = document.getElementById('chatModal');
 const chatMessages = document.getElementById('chatMessages');
@@ -31,7 +38,13 @@ const chatSubtitle = document.getElementById('chatSubtitle');
 
 document.addEventListener('DOMContentLoaded', function() {
     filterPrice.addEventListener('change', filtrarViajes);
-    refreshBtn.addEventListener('click', cargarViajes);
+    refreshBtn.addEventListener('click', function() {
+        if (document.getElementById('viajesDisponiblesContent').classList.contains('active')) {
+            cargarViajes();
+        } else {
+            cargarMisViajes();
+        }
+    });
 
     chatCloseBtn.addEventListener('click', closeChat);
     chatSendBtn.addEventListener('click', sendChatMessage);
@@ -197,8 +210,6 @@ function sendChatMessage() {
         senderId: idbussines,
         message: text
     });
-    // Optimista: pintar mi mensaje
-   // renderMessage({ message: text, created_at: new Date().toISOString(), sender_name: namebussines, conversation_id: currentConversationId, sender_id: idbussines }, true);
     input.value = '';
 }
 
@@ -247,18 +258,58 @@ function filtrarViajes() {
     mostrarViajes(viajesFiltrados);
 }
 
-// Estados UI
-function mostrarLoading() { loadingElement.style.display = 'block'; viajesGrid.style.display = 'none'; }
-function ocultarLoading() { loadingElement.style.display = 'none'; viajesGrid.style.display = 'grid'; }
-function mostrarNoViajes() { noViajesElement.style.display = 'block'; viajesGrid.style.display = 'none'; }
-function ocultarNoViajes() { noViajesElement.style.display = 'none'; }
+// Estados UI para VIAJES DISPONIBLES
+function mostrarLoading() { 
+    loadingElement.style.display = 'block'; 
+    viajesGrid.style.display = 'none'; 
+}
+function ocultarLoading() { 
+    loadingElement.style.display = 'none'; 
+    viajesGrid.style.display = 'grid'; 
+}
+function mostrarNoViajes() { 
+    noViajesElement.style.display = 'block'; 
+    viajesGrid.style.display = 'none'; 
+}
+function ocultarNoViajes() { 
+    noViajesElement.style.display = 'none'; 
+}
 function mostrarError(mensaje) {
     errorTextElement.textContent = mensaje;
     errorMessageElement.style.display = 'block';
     viajesGrid.style.display = 'none';
     loadingElement.style.display = 'none';
 }
-function ocultarError() { errorMessageElement.style.display = 'none'; }
+function ocultarError() { 
+    errorMessageElement.style.display = 'none'; 
+}
+
+// Estados UI para MIS VIAJES
+function mostrarLoadingMisViajes() { 
+    loadingMisViajesElement.style.display = 'block'; 
+    misViajesGrid.style.display = 'none'; 
+    noMisViajesElement.style.display = 'none';
+    errorMisViajesElement.style.display = 'none';
+}
+function ocultarLoadingMisViajes() { 
+    loadingMisViajesElement.style.display = 'none'; 
+}
+function mostrarNoMisViajes() { 
+    noMisViajesElement.style.display = 'block'; 
+    misViajesGrid.style.display = 'none'; 
+}
+function ocultarNoMisViajes() { 
+    noMisViajesElement.style.display = 'none'; 
+}
+function mostrarErrorMisViajes(mensaje) {
+    errorMisViajesTextElement.textContent = mensaje;
+    errorMisViajesElement.style.display = 'block';
+    misViajesGrid.style.display = 'none';
+    loadingMisViajesElement.style.display = 'none';
+}
+function ocultarErrorMisViajes() { 
+    errorMisViajesElement.style.display = 'none'; 
+}
 
 function irAlPerfil() {
     window.location.href = `perfil/perfil.html#${window.location.hash.substring(1)}`;
@@ -288,6 +339,8 @@ async function cargarFotoPerfil() {
     await obteneruser();
     await obtenerid();
     await isactive();
+    
+    // Cargar viajes disponibles por defecto
     await cargarViajes();
 
     const respuesta = await fetch(`/perfil/${idbussines}`);
@@ -321,4 +374,118 @@ function formatearFecha(fechaISO) {
         hour: 'numeric', minute: '2-digit', hour12: true
     };
     return fecha.toLocaleDateString('es-ES', opciones);
+}
+
+// Función para cambiar entre pestañas
+function cambiarTab(tab) {
+    // Remover clase active de todos los botones de pestañas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Ocultar todos los contenidos de pestañas
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Mostrar/ocultar filtros según la pestaña
+    const filtersSection = document.getElementById('filtersSection');
+    
+    if (tab === 'disponibles') {
+        // Activar pestaña "Viajes Disponibles"
+        document.getElementById('tabViajesDisponibles').classList.add('active');
+        document.getElementById('viajesDisponiblesContent').classList.add('active');
+        filtersSection.style.display = 'grid'; // Mostrar filtros
+        
+        // Cargar viajes disponibles
+        cargarViajes();
+    } 
+    else if (tab === 'misViajes') {
+        // Activar pestaña "Mis Viajes"
+        document.getElementById('tabMisViajes').classList.add('active');
+        document.getElementById('misViajesContent').classList.add('active');
+        filtersSection.style.display = 'none'; // Ocultar filtros
+        
+        // Cargar mis viajes
+        cargarMisViajes();
+    }
+}
+
+// Función para cargar MIS VIAJES
+async function cargarMisViajes() {
+    mostrarLoadingMisViajes();
+    
+    const idmisviajes = await obtenermisviajes();
+    
+    if (!idmisviajes || idmisviajes.length === 0) {
+        mostrarNoMisViajes();
+        ocultarLoadingMisViajes();
+        return;
+    }
+    
+    try {
+        // Obtener todos los viajes
+        const response = await fetch(`/viajes`);
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const data = await response.json();
+
+        if (data.success) {
+            // Filtrar solo los viajes que están en mis viajes
+            let viajesmostrar = data.viajes.filter(element => 
+                idmisviajes.includes(element.id)
+            );
+            
+            mostrarMisViajes(viajesmostrar);
+        } else {
+            throw new Error(data.message || 'Error al cargar los viajes');
+        }
+    } catch (error) {
+        console.error('Error cargando mis viajes:', error);
+        mostrarErrorMisViajes(error.message);
+    } finally {
+        ocultarLoadingMisViajes();
+    }
+}
+
+// Función para mostrar MIS VIAJES
+function mostrarMisViajes(viajesArray) {
+    if (viajesArray.length === 0) {
+        mostrarNoMisViajes();
+        return;
+    }
+
+    misViajesGrid.innerHTML = '';
+
+    viajesArray.forEach(viaje => {
+        const viajeCard = crearTarjetaViaje(viaje);
+        misViajesGrid.appendChild(viajeCard);
+    });
+    
+    // Asegurarse de que el grid sea visible
+    misViajesGrid.style.display = 'grid';
+    ocultarNoMisViajes();
+    ocultarErrorMisViajes();
+}
+
+// Función para obtener IDs de mis viajes
+async function obtenermisviajes() {
+    try {
+        const answer = await fetch(`/api/conversations/by-user/${idbussines}`);
+        const data = await answer.json();
+
+        if (!data.success) {
+            console.error(data.message);
+            return [];
+        }
+
+        // Usar Set para eliminar duplicados y luego convertirlo a Array
+        const idsUnicos = [...new Set(
+            data.conversations.map(element => element.delivery_request_id)
+        )];
+
+        return idsUnicos;
+    } catch (error) {
+        console.error('Error obteniendo mis viajes:', error);
+        return [];
+    }
 }

@@ -24,7 +24,19 @@
             </div>
         </div>
 
-        <div class="filters">
+        <!-- Nueva sección de pestañas -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" id="tabViajesDisponibles" onclick="cambiarTab('disponibles')">
+                    📋 Viajes Disponibles
+                </button>
+                <button class="tab-btn" id="tabMisViajes" onclick="cambiarTab('misViajes')">
+                    🚗 Mis Viajes
+                </button>
+            </div>
+        </div>
+
+        <div class="filters" id="filtersSection">
             <div class="filter-group">
                 <label for="filterPrice">Ordenar por:</label>
                 <select id="filterPrice">
@@ -37,27 +49,58 @@
             <button id="refreshBtn" class="refresh-btn">🔄 Actualizar</button>
         </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Cargando viajes...</p>
-        </div>
+        <!-- Contenido de viajes disponibles -->
+        <div id="viajesDisponiblesContent" class="tab-content active">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando viajes...</p>
+            </div>
 
-        <div class="viajes-grid" id="viajesGrid">
-            <!-- Los viajes se cargan dinámicamente -->
-        </div>
+            <div class="viajes-grid" id="viajesGrid">
+                <!-- Los viajes se cargan dinámicamente -->
+            </div>
 
-        <div class="no-viajes" id="noViajes" style="display: none;">
-            <div class="empty-state">
-                <h3>📭 No hay viajes disponibles</h3>
-                <p>No se encontraron viajes en este momento. Intenta más tarde.</p>
+            <div class="no-viajes" id="noViajes" style="display: none;">
+                <div class="empty-state">
+                    <h3>📭 No hay viajes disponibles</h3>
+                    <p>No se encontraron viajes en este momento. Intenta más tarde.</p>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <div class="error-state">
+                    <h3>❌ Error al cargar viajes</h3>
+                    <p id="errorText">Ha ocurrido un error. Intenta nuevamente.</p>
+                    <button onclick="cargarViajes()">Reintentar</button>
+                </div>
             </div>
         </div>
 
-        <div class="error-message" id="errorMessage" style="display: none;">
-            <div class="error-state">
-                <h3>❌ Error al cargar viajes</h3>
-                <p id="errorText">Ha ocurrido un error. Intenta nuevamente.</p>
-                <button onclick="cargarViajes()">Reintentar</button>
+        <!-- Contenido de mis viajes -->
+        <div id="misViajesContent" class="tab-content">
+            <div class="loading" id="loadingMisViajes" style="display: none;">
+                <div class="spinner"></div>
+                <p>Cargando mis viajes...</p>
+            </div>
+
+            <div class="viajes-grid" id="misViajesGrid">
+                <!-- Los viajes que ya he cogido se cargan dinámicamente -->
+            </div>
+
+            <div class="no-viajes" id="noMisViajes" style="display: none;">
+                <div class="empty-state">
+                    <h3>📭 No tienes viajes asignados</h3>
+                    <p>Aún no has aceptado ningún viaje. ¡Encuentra uno ahora!</p>
+                    <button class="btn-secondary" onclick="cambiarTab('disponibles')">Ver viajes disponibles</button>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMisViajes" style="display: none;">
+                <div class="error-state">
+                    <h3>❌ Error al cargar tus viajes</h3>
+                    <p id="errorMisViajesText">Ha ocurrido un error. Intenta nuevamente.</p>
+                    <button onclick="cargarMisViajes()">Reintentar</button>
+                </div>
             </div>
         </div>
     </div>

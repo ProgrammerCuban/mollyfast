@@ -193,6 +193,150 @@ body {
     transition: width 0.6s, height 0.6s;
 }
 
+/* ==================== */
+/* PESTAÑAS */
+/* ==================== */
+
+.tabs-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 8px;
+    margin-bottom: clamp(16px, 4vw, 24px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: clamp(12px, 2vw, 16px) clamp(16px, 3vw, 24px);
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tab-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tab-btn.active:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Contenido de pestañas */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Botón secundario para estado vacío */
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: none;
+    padding: clamp(10px, 2vw, 14px) clamp(20px, 3vw, 28px);
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: clamp(0.9rem, 1.8vw, 1rem);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #495057, #6c757d);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* ==================== */
+/* RESPONSIVE PESTAÑAS */
+/* ==================== */
+
+@media (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabs-container {
+        border-radius: 12px;
+        padding: 6px;
+    }
+    
+    .tab-btn {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Modo oscuro para pestañas */
+@media (prefers-color-scheme: dark) {
+    .tabs-container {
+        background: rgba(45, 45, 45, 0.95);
+        border-color: rgba(102, 126, 234, 0.1);
+    }
+    
+    .tab-btn {
+        color: #a0aec0;
+    }
+    
+    .tab-btn:hover {
+        background: rgba(102, 126, 234, 0.15);
+        color: #667eea;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+    }
+    
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+    }
+}
+
 .refresh-btn:hover::before {
     width: 300px;
     height: 300px;
