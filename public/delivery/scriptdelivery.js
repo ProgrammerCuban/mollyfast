@@ -170,6 +170,11 @@ async function openChat(viaje) {
         const clientId = viaje.propietario;
         const deliveryId = idbussines;
 
+        // marcar los sms como leidos
+
+
+      
+
         // Crear/obtener conversación vía REST
         const resp = await fetch('/api/conversations/get-or-create', {
             method: 'POST',
@@ -181,6 +186,15 @@ async function openChat(viaje) {
 
         currentConversationId = data.conversationId;
         currentReceiverId = clientId;
+
+          const answerbackend  = await fetch (`/api/messages/${2}/${currentConversationId}/read`);
+        
+        const dataaux = await answerbackend.json();
+
+        if(!dataaux.success)
+        {
+            alert("hubo un error al marcar el sms como leido");
+        }
 
         // Unirse a la sala de la conversación en Socket.IO
         socket.emit('join_conversation', {
@@ -227,7 +241,7 @@ function sendChatMessage() {
 }
 
 // Renderizar mensaje en el UI
-function renderMessage(m) {
+async function renderMessage(m) {
     const isMe = Number(m.sender_id) === Number(idbussines);
     const wrapper = document.createElement('div');
     wrapper.className = `msg ${isMe ? 'me' : 'other'}`;
@@ -251,10 +265,10 @@ function closeChat() {
 }
 
 // Escuchar mensajes nuevos desde el servidor
-socket.on('new_message', (msg) => {
+socket.on('new_message',async (msg)  => {
     // Solo renderizamos si pertenece a la conversación actual
     if (Number(msg.conversation_id) === Number(currentConversationId)) {
-        renderMessage(msg);
+       await renderMessage(msg);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 });

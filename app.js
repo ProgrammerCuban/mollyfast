@@ -7,10 +7,8 @@ const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const http = require('http');
 const socketIo = require('socket.io');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
@@ -808,7 +806,7 @@ app.get('/api/conversations/:id/messages', async (req, res) => {
     try {
         const conversationId = req.params.id;
         const [rows] = await connection.promise().execute(
-            `SELECT m.id, m.conversation_id, m.sender_id, m.message, m.is_read, m.created_at,
+            `SELECT m.id, m.conversation_id, m.sender_id, m.message, m.is_read , m.is_read, m.created_at,
                     u.usuario AS sender_name
              FROM messages m
              JOIN usuarios u ON m.sender_id = u.id
@@ -885,22 +883,32 @@ app.get('/api/messages/count-by-trip/:tripId', async (req, res) => {
     }
 });
 
-// Endpoint: marcar mensaje como leído
-app.patch('/api/messages/:id/read', async (req, res) => {
-    try {
-        const messageId = req.params.id;
-        const [result] = await connection.promise().execute(
-            'UPDATE messages SET is_read = TRUE WHERE id = ?',
-            [messageId]
+app.get('/api/messages/:id/:conversacionid/read', async (req, res) => {
+  const id = Number(req.params.id);
+  const conversacionid = Number(req.params.conversacionid);
+
+    try{
+     if(id == 1){
+      await connection.promise().execute(
+            `UPDATE conversations SET cnl = 0 WHERE id = ?`,
+            [conversacionid]
         );
-        if (result.affectedRows > 0) {
-            return res.json({ success: true });
-        } else {
-            return res.json({ success: false, message: 'Mensaje no encontrado' });
-        }
-    } catch (err) {
-        console.error('❌ Error marcando leído:', err);
-        return res.json({ success: false, message: 'No se pudo marcar como leído' });
+      
+        return res.json({success: true});
+      }
+      else{
+     await connection.promise().execute(
+            `UPDATE conversations SET dnl = 0 WHERE id = ?`,
+            [conversacionid]
+        );
+      
+        return res.json({success: true});
+    }
+    
+    }catch(error)
+    {
+            console.error(error);
+            return res.json({success:false});
     }
 });
 
@@ -955,6 +963,33 @@ io.on('connection', (socket) => {
                 'UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?',
                 [conversationId]
             );
+
+            let isactive = false;
+
+            const idrecibe = await obtenerIdOpuesto(senderId,conversationId);
+
+            for (let [userId, socketId] of activeUsers.entries()) {
+            if (socketId === idrecibe) {
+               isactive = true;
+                break;
+            }
+        }
+   if (!isactive) {
+    const [result] = await connection.promise().execute(
+        `UPDATE conversations 
+         SET 
+             dnl = CASE 
+                 WHEN ? = delivery_id THEN dnl 
+                 ELSE dnl + 1 
+             END,
+             cnl = CASE 
+                 WHEN ? = delivery_id THEN cnl + 1 
+                 ELSE cnl 
+             END
+         WHERE id = ?`,
+        [senderId, senderId, conversationId]
+    );
+   }
 
             console.log(`📨 Mensaje enviado en conversación ${conversationId} por usuario ${senderId}`);
         } catch (error) {
@@ -1218,4 +1253,34 @@ function createTransporter() {
         debug: false,
         logger: false
     });
+}
+
+async function obtenerIdOpuesto(idParametro, idconversacion) {
+    try {
+        const query = `
+            SELECT 
+                CASE 
+                    WHEN ? = client_id THEN delivery_id
+                    WHEN ? = delivery_id THEN client_id
+                    ELSE NULL
+                END AS id_opuesto
+            FROM conversations 
+            WHERE (id = ?)
+            LIMIT 1
+        `;
+        
+        // USAR connection.promise() para obtener la versión con promesas
+        const [rows] = await connection.promise().query(query, [
+            idParametro, idParametro, idconversacion
+        ]);
+        
+        if (!rows || rows.length === 0 || rows[0].id_opuesto === null) {
+            return null;
+        }
+
+        return rows[0].id_opuesto;
+    } catch (error) {
+        console.error('Error al obtener ID opuesto:', error);
+        return null;
+    }
 }

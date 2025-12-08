@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <link rel="stylesheet" href="ver-perfil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <button id="backButton" class="btn-back animate__animated animate__fadeInLeft">
+                    <i class="fas fa-arrow-left"></i> Atrás
+                </button>
+                <div class="header-text">
+                    <h1><i class="fas fa-user-circle"></i> Perfil de Usuario</h1>
+                    <p class="subtitle">Información detallada del perfil</p>
+                </div>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <!-- Información del perfil -->
+            <div class="profile-card animate__animated animate__fadeIn">
+                <div class="profile-header">
+                    <div class="profile-image-container">
+                        <img id="profileImage" src="https://via.placeholder.com/150" alt="Foto de perfil" class="profile-image">
+                        <div class="profile-type-badge" id="profileType">Negocio</div>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="userName">Nombre de Usuario</h2>
+                        <div class="rating-container">
+                            <div class="stars" id="ratingStars">
+                                <!-- Las estrellas se generan dinámicamente -->
+                            </div>
+                            <span class="rating-text" id="ratingText">0.0 (0 calificaciones)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-details">
+                    <h3><i class="fas fa-info-circle"></i> Información de Contacto</h3>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="detail-content">
+                            <span class="detail-label">Usuario</span>
+                            <span class="detail-value" id="usernameField">Cargando...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="detail-content">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value" id="emailField">Cargando...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="detail-content">
+                            <span class="detail-label">Teléfono</span>
+                            <span class="detail-value" id="phoneField">Cargando...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="detail-content">
+                            <span class="detail-label">Tipo de cuenta</span>
+                            <span class="detail-value" id="accountType">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-footer">
+                    <p class="last-update">Última actualización: <span id="lastUpdate">Hoy</span></p>
+                </div>
+            </div>
+      
+            <!-- Indicador de carga -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <p>Cargando perfil...</p>
+            </div>
+            
+            <!-- Mensaje de error -->
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>No se pudo cargar el perfil. Por favor, intenta de nuevo.</p>
+                <button id="retryButton" class="btn-retry">Reintentar</button>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2023 Perfil de Usuario. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+    
+    <script src="ver-perfil.js"></script>
+</body>
+</html>

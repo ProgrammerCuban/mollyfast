@@ -18,21 +18,24 @@ async function inicial() {
     initializeSocket();
 }
 
-function initializeSocket() {
+ async function initializeSocket() {
     if (socket) return;
     try {
         // Usa la ruta por defecto del servidor
         socket = io();
 
-        socket.on('new_message', (msg) => {
-            if (Number(msg.conversation_id) === Number(currentConversationId)) {
-                renderMessage(msg, msg.sender_id === idbussines);
-            }
-            // Actualizar contadores visuales si el mensaje pertenece al viaje abierto
-            if (currentTripId) {
-                actualizarContadorTrip(currentTripId);
-            }
-        });
+     socket.on('new_message',async (msg)  => {
+    // Solo renderizamos si pertenece a la conversación actual
+    if (Number(msg.conversation_id) === Number(currentConversationId)) {
+       await renderMessage(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    if (currentTripId) {
+     actualizarContadorTrip(currentTripId);
+      }
+    });
+         
 
         socket.on('message_error', (payload) => {
             console.error('Error de mensaje:', payload);
@@ -47,7 +50,7 @@ async function cargarFotoPerfil() {
     const data = await respuesta.json();
     if (data.success) {
         document.getElementById('profileHeaderImage').src = data.perfil[0].fotoperfil || '';
-    }
+    }9
 }
 
 function irAlPerfil() {
@@ -215,7 +218,7 @@ async function renderModalDeliverys(deliveries) {
 
            const datacode = await respuesta.json();
 
-            const profileUrl = `../ver-perfil/ver-perfil.html#${datacode.coder}`;
+            const profileUrl = `../ver-perfil/ver-perfil.html#${d.delivery_id}`;
 
             const answerfoto = await fetch(`/perfil/${d.delivery_id}`);
 
@@ -232,9 +235,9 @@ async function renderModalDeliverys(deliveries) {
                 <div class="delivery-row">
                     <div class="delivery-info" style="display: flex; align-items: center; gap: 12px;">
                         <div class="delivery-avatar">
-                            <a href="${profileUrl}" target="_blank" title="Ver perfil de ${escapeHtml(d.delivery_name)}">
-                                <img src="${fotop || 'default-avatar.png'}" alt="${escapeHtml(d.delivery_name)}">
-                            </a>
+                          <a href="${profileUrl}" title="Ver perfil de ${escapeHtml(d.delivery_name)}">
+                           <img src="${fotop || 'default-avatar.png'}" alt="${escapeHtml(d.delivery_name)}">
+                          </a>
                         </div>
                         <div>
                             <div class="delivery-name">🚚 ${escapeHtml(d.delivery_name)}</div>
@@ -301,6 +304,17 @@ function cerrarChatModal() {
 }
 
 async function cargarHistorialConversacion(conversationId) {
+
+    const answerbackend  = await fetch (`/api/messages/${1}/${conversationId}/read`);
+        
+        const dataaux = await answerbackend.json();
+
+        if(!dataaux.success)
+        {
+            alert("hubo un error al marcar el sms como leido");
+        }
+
+
     const cont = document.getElementById('chatMessages');
     cont.innerHTML = '';
     try {
@@ -308,7 +322,7 @@ async function cargarHistorialConversacion(conversationId) {
         const data = await res.json();
         if (data.success) {
             for (const m of data.messages) {
-                renderMessage(m, m.sender_id === idbussines);
+                renderMessage(m);
             }
         } else {
             cont.innerHTML = `<div class="empty-row">No hay mensajes aún.</div>`;
@@ -319,33 +333,22 @@ async function cargarHistorialConversacion(conversationId) {
     }
 }
 
-function renderMessage(m, isMine) {
-    const cont = document.getElementById('chatMessages');
-    if (!cont) return;
-    const row = document.createElement('div');
-    row.className = `msg ${isMine ? 'msg-mine' : 'msg-other'}`;
-    
-    // URL AQUÍ: Reemplaza "/perfil/perfil.html" con la página a la que quieres redirigir
-    const profileUrl = `/perfil/perfil.html#${m.sender_id}`;
-    
-    row.innerHTML = `
-        <div class="msg-bubble">
-            <div class="msg-avatar">
-                <a href="${profileUrl}" target="_blank" title="Ver perfil">
-                    <img src="${m.profile_picture || usuariocompleto.fotoperfil || 'default-avatar.png'}" alt="${escapeHtml(m.sender_name || 'Usuario')}">
-                </a>
-            </div>
-            <div class="msg-content">
-                <div class="msg-text">${escapeHtml(m.message)}</div>
-                <div class="msg-meta">${new Date(m.created_at).toLocaleString()} • ${escapeHtml(m.sender_name || '')}</div>
-            </div>
-        </div>
-    `;
-    cont.appendChild(row);
-    cont.scrollTop = cont.scrollHeight;
+async function renderMessage(m) {
+    const isMe = Number(m.sender_id) === Number(idbussines);
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg ${isMe ? 'me' : 'other'}`;
+    wrapper.textContent = m.message;
+
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    const date = m.created_at ? new Date(m.created_at) : new Date();
+    meta.textContent = date.toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+    chatMessages.appendChild(wrapper);
+    chatMessages.appendChild(meta);
 }
 
-function sendChatMessage() {
+ async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = String(input.value || '').trim();
     if (!text) return;
@@ -361,9 +364,10 @@ function sendChatMessage() {
         sender_name: namebussines, 
         conversation_id: currentConversationId, 
         sender_id: idbussines,
+        is_read: true,
         profile_picture: usuariocompleto.fotoperfil || ''
     };
-    renderMessage(message, true);
+    //  renderMessage(message, true);
     input.value = '';
     actualizarContadorTrip(currentTripId);
 }
@@ -654,3 +658,5 @@ function escapeHtml(str) {
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'
     }[c]));
 }
+
+// /api/messages/
