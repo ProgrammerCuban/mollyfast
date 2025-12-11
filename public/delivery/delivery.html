@@ -6,7 +6,7 @@
     <title>Viajes Disponibles - MiDelivery</title>
     <link rel="stylesheet" href="styledelivery.css" />
 </head>
-<body onload="cargarFotoPerfil()">
+<body onload="inicial()">
     <div class="container">
         <div class="header-container">
             <div class="header-content">
@@ -31,7 +31,8 @@
                     📋 Viajes Disponibles
                 </button>
                 <button class="tab-btn" id="tabMisViajes" onclick="cambiarTab('misViajes')">
-                    🚗 Mis Viajes
+                    🚗 Mis Viajes 
+                    <span id="misViajesBadge" class="tab-badge" style="display: none;"></span>
                 </button>
             </div>
         </div>

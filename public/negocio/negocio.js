@@ -13,30 +13,29 @@ async function inicial() {
     await obtenerid();
     await cargarviajes();
     await cargarFotoPerfil();
-
-    // Inicializar socket después de tener sesión/local
     initializeSocket();
 }
 
- async function initializeSocket() {
+async function initializeSocket() {
     if (socket) return;
     try {
-        // Usa la ruta por defecto del servidor
         socket = io();
-
-     socket.on('new_message',async (msg)  => {
-    // Solo renderizamos si pertenece a la conversación actual
-    if (Number(msg.conversation_id) === Number(currentConversationId)) {
-       await renderMessage(msg);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    if (currentTripId) {
-     actualizarContadorTrip(currentTripId);
-      }
-    });
-         
-
+        
+        socket.on('new_message', async (msg) => {
+            if (Number(msg.conversation_id) === Number(currentConversationId)) {
+                await renderMessage(msg);
+                scrollToBottom();
+            }
+            
+            if (currentTripId) {
+                actualizarContadorTrip(currentTripId);
+                // Actualizar contador de mensajes perdidos para la conversación activa
+                if (currentConversationId) {
+                    await actualizarContadorPerdidos(currentConversationId);
+                }
+            }
+        });
+        
         socket.on('message_error', (payload) => {
             console.error('Error de mensaje:', payload);
         });
@@ -50,7 +49,7 @@ async function cargarFotoPerfil() {
     const data = await respuesta.json();
     if (data.success) {
         document.getElementById('profileHeaderImage').src = data.perfil[0].fotoperfil || '';
-    }9
+    }
 }
 
 function irAlPerfil() {
@@ -76,7 +75,6 @@ async function obtenerid() {
     const datosid = await respuestaid.json();
     idbussines = datosid.id.id;
     usuariocompleto = datosid;
-    
 }
 
 async function cargarviajes() {
@@ -98,7 +96,7 @@ async function carga(viajes) {
     for (const viaje of viajes) {
         const count = await obtenerConteoMensajesPorViaje(viaje.id);
         const viajeHTML = `
-            <div class="viaje-card">
+            <div class="viaje-card ${count > 0 ? 'green' : ''}" id="viaje-card-${viaje.id}">
                 <div class="viaje-header">
                     <h2>Viaje #${viaje.id}</h2>
                     <span class="precio">$${viaje.precio}</span>
@@ -142,7 +140,7 @@ async function carga(viajes) {
 
 async function obtenerConteoMensajesPorViaje(tripId) {
     try {
-        const res = await fetch(`/api/messages/count-by-trip/${tripId}`);
+        const res = await fetch(`/api/messages/count/chat/negocio/${tripId}`);
         const data = await res.json();
         return data.success ? (data.total || 0) : 0;
     } catch (err) {
@@ -151,10 +149,71 @@ async function obtenerConteoMensajesPorViaje(tripId) {
     }
 }
 
+async function obtenerMensajesPerdidosPorConversacion(conversationId) {
+    try {
+        // NUEVA PETICIÓN: Obtener cantidad de mensajes perdidos
+        const res = await fetch(`/api/conversations/${conversationId}/unread-count`);
+        const data = await res.json();
+        return data.success ? (data.unreadCount || 0) : 0;
+    } catch (err) {
+        console.error('Error obteniendo mensajes perdidos:', err);
+        return 0;
+    }
+}
+
+async function actualizarContadorPerdidos(conversationId) {
+    try {
+        const unreadCount = await obtenerMensajesPerdidosPorConversacion(conversationId);
+        // Buscar y actualizar la fila correspondiente en el modal
+        const deliveryRow = document.querySelector(`.delivery-row[data-conversation-id="${conversationId}"]`);
+        if (deliveryRow) {
+            const unreadBadge = deliveryRow.querySelector('.unread-badge');
+            if (unreadCount > 0) {
+                if (!unreadBadge) {
+                    // Crear badge si no existe
+                    const badge = document.createElement('span');
+                    badge.className = 'unread-badge';
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    badge.title = `${unreadCount} mensaje(s) no leído(s)`;
+                    
+                    const openButton = deliveryRow.querySelector('.delivery-open');
+                    if (openButton) {
+                        openButton.parentNode.insertBefore(badge, openButton.nextSibling);
+                    }
+                } else {
+                    // Actualizar badge existente
+                    unreadBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    unreadBadge.title = `${unreadCount} mensaje(s) no leído(s)`;
+                }
+                // Agregar clase para resaltar
+                deliveryRow.classList.add('has-unread');
+            } else {
+                // Remover badge si existe
+                if (unreadBadge) {
+                    unreadBadge.remove();
+                }
+                // Remover clase de resaltado
+                deliveryRow.classList.remove('has-unread');
+            }
+        }
+    } catch (err) {
+        console.error('Error actualizando contador perdidos:', err);
+    }
+}
+
 async function actualizarContadorTrip(tripId) {
     const count = await obtenerConteoMensajesPorViaje(tripId);
     const el = document.getElementById(`msg-count-${tripId}`);
     if (el) el.textContent = count;
+    
+    const card = document.getElementById(`viaje-card-${tripId}`);
+    if (card) {
+        if (count > 0) {
+            card.classList.add('green');
+        } else {
+            card.classList.remove('green');
+        }
+    }
 }
 
 async function abrirListaDeliverys(tripId) {
@@ -165,7 +224,7 @@ async function abrirListaDeliverys(tripId) {
         const data = await res.json();
         setLoading(false);
         if (data.success) {
-           await renderModalDeliverys(data.deliveries || []);
+            await renderModalDeliverys(data.deliveries || []);
             await actualizarContadorTrip(tripId);
         } else {
             alert(data.message || 'No se pudo cargar la lista de interesados');
@@ -178,7 +237,6 @@ async function abrirListaDeliverys(tripId) {
 }
 
 async function renderModalDeliverys(deliveries) {
-    // Crear modal si no existe
     let modal = document.getElementById('deliveryListModal');
     if (!modal) {
         const html = `
@@ -205,46 +263,50 @@ async function renderModalDeliverys(deliveries) {
         list.innerHTML = `<div class="empty-row">No hay mensajes aún para este viaje.</div>`;
     } else {
         for (const d of deliveries) {
+            const respuesta = await fetch('/encript', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user: d.delivery_name
+                })
+            });
 
-          const respuesta = await fetch('/encript',{
-           method:'POST',
-          headers:{
-           'Content-Type': 'application/json',
-           },
-             body:JSON.stringify({
-           user: d.delivery_name
-           })
-           });
-
-           const datacode = await respuesta.json();
-
+            const datacode = await respuesta.json();
             const profileUrl = `../ver-perfil/ver-perfil.html#${d.delivery_id}`;
-
             const answerfoto = await fetch(`/perfil/${d.delivery_id}`);
-
             const datafoto = await answerfoto.json();
-
             let fotop = "";
 
-            if(datafoto.success)
-            {
+            if (datafoto.success) {
                 fotop = datafoto.perfil[0].fotoperfil;
             }
-            
+
+            // Obtener mensajes perdidos para esta conversación
+            const unreadCount = await obtenerMensajesPerdidosPorConversacion(d.conversation_id);
+            const hasUnread = unreadCount > 0 ? 'has-unread' : '';
+            const unreadBadgeHTML = unreadCount > 0 ? 
+                `<span class="unread-badge" title="${unreadCount} mensaje(s) no leído(s)">${unreadCount > 9 ? '9+' : unreadCount}</span>` : 
+                '';
+
             const row = `
-                <div class="delivery-row">
+                <div class="delivery-row ${hasUnread}" data-conversation-id="${d.conversation_id}">
                     <div class="delivery-info" style="display: flex; align-items: center; gap: 12px;">
                         <div class="delivery-avatar">
-                          <a href="${profileUrl}" title="Ver perfil de ${escapeHtml(d.delivery_name)}">
-                           <img src="${fotop || 'default-avatar.png'}" alt="${escapeHtml(d.delivery_name)}">
-                          </a>
+                            <a href="${profileUrl}" title="Ver perfil de ${escapeHtml(d.delivery_name)}">
+                                <img src="${fotop || 'default-avatar.png'}" alt="${escapeHtml(d.delivery_name)}">
+                            </a>
                         </div>
                         <div>
                             <div class="delivery-name">🚚 ${escapeHtml(d.delivery_name)}</div>
                             <div class="delivery-meta">Mensajes: ${d.messages_count} • Último: ${d.last_message_at ? new Date(d.last_message_at).toLocaleString() : '—'}</div>
                         </div>
                     </div>
-                    <button class="delivery-open" onclick="abrirChatConDelivery(${d.conversation_id}, ${d.delivery_id}, '${escapeHtml(d.delivery_name)}')">Abrir chat</button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="delivery-open" onclick="abrirChatConDelivery(${d.conversation_id}, ${d.delivery_id}, '${escapeHtml(d.delivery_name)}')">Abrir chat</button>
+                        ${unreadBadgeHTML}
+                    </div>
                 </div>
             `;
             list.insertAdjacentHTML('beforeend', row);
@@ -253,6 +315,7 @@ async function renderModalDeliverys(deliveries) {
 
     modal.style.display = 'flex';
 }
+
 function cerrarDeliveryModal() {
     const modal = document.getElementById('deliveryListModal');
     if (modal) modal.style.display = 'none';
@@ -262,10 +325,8 @@ async function abrirChatConDelivery(conversationId, deliveryId, deliveryName) {
     currentConversationId = conversationId;
     currentChatDeliveryId = deliveryId;
 
-    // Unirse a la conversación
     socket.emit('join_conversation', { conversationId, userId: idbussines });
 
-    // Crear modal de chat si no existe
     let modal = document.getElementById('chatModal');
     if (!modal) {
         const html = `
@@ -291,11 +352,38 @@ async function abrirChatConDelivery(conversationId, deliveryId, deliveryName) {
         modal.querySelector('.modal-header h3').textContent = `Chat con ${deliveryName}`;
     }
 
-    // Cargar historial
     await cargarHistorialConversacion(conversationId);
-
+    
+    // Marcar como leídos después de abrir el chat
+    await marcarComoLeido(conversationId);
+    
     modal.style.display = 'flex';
+    
+    // Scroll al final después de que se renderice todo
+    setTimeout(() => {
+        scrollToBottom();
+    }, 150);
+    
     cerrarDeliveryModal();
+}
+
+async function marcarComoLeido(conversationId) {
+    try {
+        // NUEVA PETICIÓN: Marcar mensajes como leídos
+        const res = await fetch(`/api/conversations/${conversationId}/mark-as-read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: idbussines })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            // Actualizar visualmente la fila en el modal
+            await actualizarContadorPerdidos(conversationId);
+        }
+    } catch (err) {
+        console.error('Error marcando como leído:', err);
+    }
 }
 
 function cerrarChatModal() {
@@ -304,16 +392,12 @@ function cerrarChatModal() {
 }
 
 async function cargarHistorialConversacion(conversationId) {
+    const answerbackend = await fetch(`/api/messages/${1}/${conversationId}/read`);
+    const dataaux = await answerbackend.json();
 
-    const answerbackend  = await fetch (`/api/messages/${1}/${conversationId}/read`);
-        
-        const dataaux = await answerbackend.json();
-
-        if(!dataaux.success)
-        {
-            alert("hubo un error al marcar el sms como leido");
-        }
-
+    if (!dataaux.success) {
+        alert("hubo un error al marcar el sms como leido");
+    }
 
     const cont = document.getElementById('chatMessages');
     cont.innerHTML = '';
@@ -322,8 +406,12 @@ async function cargarHistorialConversacion(conversationId) {
         const data = await res.json();
         if (data.success) {
             for (const m of data.messages) {
-                renderMessage(m);
+                await renderMessage(m);
             }
+            // Scroll al final después de cargar todos los mensajes
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
         } else {
             cont.innerHTML = `<div class="empty-row">No hay mensajes aún.</div>`;
         }
@@ -344,11 +432,27 @@ async function renderMessage(m) {
     const date = m.created_at ? new Date(m.created_at) : new Date();
     meta.textContent = date.toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-    chatMessages.appendChild(wrapper);
-    chatMessages.appendChild(meta);
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.appendChild(wrapper);
+        chatMessages.appendChild(meta);
+    }
 }
 
- async function sendChatMessage() {
+function scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        // Usar diferentes métodos para asegurar compatibilidad
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // También puedes usar esto para mayor compatibilidad
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 10);
+    }
+}
+
+async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = String(input.value || '').trim();
     if (!text) return;
@@ -357,18 +461,17 @@ async function renderMessage(m) {
         senderId: idbussines,
         message: text
     });
-    // Optimista: pintar mi mensaje
     const message = {
-        message: text, 
-        created_at: new Date().toISOString(), 
-        sender_name: namebussines, 
-        conversation_id: currentConversationId, 
+        message: text,
+        created_at: new Date().toISOString(),
+        sender_name: namebussines,
+        conversation_id: currentConversationId,
         sender_id: idbussines,
         is_read: true,
         profile_picture: usuariocompleto.fotoperfil || ''
     };
-    //  renderMessage(message, true);
     input.value = '';
+    scrollToBottom();
     actualizarContadorTrip(currentTripId);
 }
 
@@ -658,5 +761,3 @@ function escapeHtml(str) {
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'
     }[c]));
 }
-
-// /api/messages/

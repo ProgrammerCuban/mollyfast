@@ -228,6 +228,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
 }
 
 .tab-btn:hover {
@@ -246,6 +247,29 @@ body {
     background: linear-gradient(135deg, #764ba2, #667eea);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Badge para pestañas */
+.tab-badge {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    animation: pulseBadge 2s infinite;
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 /* Contenido de pestañas */
@@ -310,6 +334,13 @@ body {
         padding: 12px;
         font-size: 0.9rem;
     }
+    
+    .tab-badge {
+        font-size: 0.65rem;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 8px;
+    }
 }
 
 /* Modo oscuro para pestañas */
@@ -334,6 +365,88 @@ body {
     
     .btn-secondary:hover {
         background: linear-gradient(135deg, #2d3748, #4a5568);
+    }
+    
+    .tab-badge {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.6);
+    }
+}
+
+/* ==================== */
+/* ESTILOS PARA VIAJES CON MENSAJES PERDIDOS */
+/* ==================== */
+
+.viaje-card.unread {
+    border: 2px solid #28a745;
+    background: linear-gradient(135deg, #f1fff1, #e6ffe6);
+    animation: highlightViaje 1.5s ease;
+}
+
+@keyframes highlightViaje {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* Botón de chat con mensajes perdidos */
+.chat-btn.unread {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    position: relative;
+}
+
+.chat-btn.unread::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    background: #e74c3c;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+    border: 2px solid white;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Badge para botón de chat */
+.chat-badge {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    margin-left: 8px;
+    animation: pulseChatBadge 2s infinite;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+}
+
+@keyframes pulseChatBadge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Modo oscuro para viajes con mensajes no leídos */
+@media (prefers-color-scheme: dark) {
+    .viaje-card.unread {
+        border: 2px solid #28a745;
+        background: linear-gradient(135deg, #1a2c1a, #142914);
+    }
+    
+    .chat-badge {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.6);
     }
 }
 

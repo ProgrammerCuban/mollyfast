@@ -1,16 +1,17 @@
 // Variable global para el diccionario
 let diccionarioUsuarios = {};
-let idbussines;      // ID del delivery logueado (emisor potencial)
-let namebussines;
+let idbussines = null;      // ID del delivery logueado
+let namebussines = null;
 let codigo = window.location.hash.substring(1);
 
 // Socket.IO client
-const socket = io(); // se conecta a tu backend
+const socket = io();
 
 // Estado global
 let viajes = [];
 let currentConversationId = null;
 let currentReceiverId = null;
+let misViajesUnreadCount = 0;
 
 // Referencias DOM
 const viajesGrid = document.getElementById('viajesGrid');
@@ -27,6 +28,7 @@ const loadingMisViajesElement = document.getElementById('loadingMisViajes');
 const noMisViajesElement = document.getElementById('noMisViajes');
 const errorMisViajesElement = document.getElementById('errorMisViajes');
 const errorMisViajesTextElement = document.getElementById('errorMisViajesText');
+const misViajesBadgeElement = document.getElementById('misViajesBadge');
 
 // Modal chat refs
 const chatModal = document.getElementById('chatModal');
@@ -36,10 +38,13 @@ const chatSendBtn = document.getElementById('chatSendBtn');
 const chatCloseBtn = document.getElementById('chatCloseBtn');
 const chatSubtitle = document.getElementById('chatSubtitle');
 
+// Estado de pestañas
+let currentTab = 'disponibles';
+
 document.addEventListener('DOMContentLoaded', function() {
     filterPrice.addEventListener('change', filtrarViajes);
     refreshBtn.addEventListener('click', function() {
-        if (document.getElementById('viajesDisponiblesContent').classList.contains('active')) {
+        if (currentTab === 'disponibles') {
             cargarViajes();
         } else {
             cargarMisViajes();
@@ -51,19 +56,59 @@ document.addEventListener('DOMContentLoaded', function() {
     chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 });
 
+// FUNCIÓN PRINCIPAL DE INICIALIZACIÓN
+async function inicial() {
+    try {
+        await obteneruser();
+        await obtenerid();
+        await isactive();
+        await cargarFotoPerfil();
+        await cargarDiccionarioUsuarios();
+        
+        // Inicializar socket
+        inicializarSocket();
+        
+        // Cargar viajes disponibles por defecto
+        await cargarViajes();
+        
+        // Obtener conteo de mensajes perdidos
+        await obtenerViajesConMensajesPerdidos();
+        
+    } catch (error) {
+        console.error('Error en inicialización:', error);
+        alert('Error al cargar la aplicación. Por favor, recarga la página.');
+    }
+}
+
+function inicializarSocket() {
+    socket.on('new_message', async (msg) => {
+        if (Number(msg.conversation_id) === Number(currentConversationId)) {
+            await renderMessage(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Actualizar conteo cuando llega nuevo mensaje
+        await obtenerViajesConMensajesPerdidos();
+        
+        // Si el mensaje es para el viaje actual, refrescar
+        if (currentTab === 'misViajes') {
+            setTimeout(() => cargarMisViajes(), 500);
+        }
+    });
+}
+
 async function cargarDiccionarioUsuarios() {
     try {
         const response = await fetch('/usuarios-id');
         const data = await response.json();
         if (data.success) {
+            diccionarioUsuarios = {};
             data.usuarios.forEach(element => {
                 diccionarioUsuarios[element.id] = element.usuario;
             });
-            return diccionarioUsuarios;
         }
     } catch (error) {
-        console.error('Error:', error);
-        return {};
+        console.error('Error cargando diccionario:', error);
     }
 }
 
@@ -71,7 +116,13 @@ async function cargarViajes() {
     mostrarLoading();
     ocultarError();
     ocultarNoViajes();
-    await cargarDiccionarioUsuarios();
+    
+    // Verificar que idbussines esté disponible
+    if (!idbussines) {
+        console.error('idbussines no está definido');
+        mostrarError('Error de usuario. Por favor, recarga la página.');
+        return;
+    }
 
     try {
         const response = await fetch(`/viajes`);
@@ -86,24 +137,20 @@ async function cargarViajes() {
     } catch (error) {
         console.error('Error:', error);
         mostrarError(error.message);
+        return;
     }
 
-    let filtroviajes = [];
-
-    const misviajes = await obtenermisviajes();
-
-    viajes.forEach(element => {
-        if(!misviajes.includes(element.id))
-        {
-            filtroviajes.push(element);
-        }
-    });
-
-    mostrarViajes(filtroviajes);
-
+    try {
+        const misviajes = await obtenermisviajes();
+        let filtroviajes = viajes.filter(element => !misviajes.includes(element.id));
+        await mostrarViajes(filtroviajes);
+    } catch (error) {
+        console.error('Error filtrando viajes:', error);
+        mostrarError('Error al procesar los viajes');
+    }
 }
 
-function mostrarViajes(viajesArray) {
+async function mostrarViajes(viajesArray) {
     ocultarLoading();
 
     if (viajesArray.length === 0) {
@@ -113,15 +160,35 @@ function mostrarViajes(viajesArray) {
 
     viajesGrid.innerHTML = '';
 
-    viajesArray.forEach(viaje => {
-        const viajeCard = crearTarjetaViaje(viaje);
-        viajesGrid.appendChild(viajeCard);
+    // Procesar viajes en paralelo para mejor rendimiento
+    const viajesPromises = viajesArray.map(async (viaje) => {
+        return await crearTarjetaViaje(viaje);
+    });
+
+    const viajesCards = await Promise.all(viajesPromises);
+    
+    viajesCards.forEach(card => {
+        viajesGrid.appendChild(card);
     });
 }
 
-function crearTarjetaViaje(viaje) {
+async function crearTarjetaViaje(viaje) {
     const card = document.createElement('div');
     card.className = 'viaje-card';
+
+    // Obtener mensajes perdidos para este viaje
+    let unreadCount = 0;
+    try {
+        unreadCount = await obtenerMensajesPerdidosPorViaje(viaje.id);
+    } catch (error) {
+        console.error(`Error obteniendo mensajes perdidos para viaje ${viaje.id}:`, error);
+    }
+    
+    const hasUnread = unreadCount > 0;
+    
+    if (hasUnread) {
+        card.classList.add('unread');
+    }
 
     card.innerHTML = `
         <div class="viaje-header">
@@ -153,7 +220,10 @@ function crearTarjetaViaje(viaje) {
             <p>${viaje.detalles_adicionales || 'Sin detalles adicionales'}</p>
         </div>
 
-        <button class="chat-btn" data-viaje-id="${viaje.id}">💬 SMS</button>
+        <button class="chat-btn ${hasUnread ? 'unread' : ''}" data-viaje-id="${viaje.id}">
+            💬 SMS 
+            ${hasUnread ? `<span class="chat-badge">${unreadCount > 9 ? '9+' : unreadCount}</span>` : ''}
+        </button>
     `;
 
     const btn = card.querySelector('.chat-btn');
@@ -162,41 +232,100 @@ function crearTarjetaViaje(viaje) {
     return card;
 }
 
-// Abrir chat: crea/obtiene conversación, une al socket y carga historial
+// Obtener mensajes perdidos por viaje
+async function obtenerMensajesPerdidosPorViaje(viajeId) {
+    try {
+        // IMPORTANTE: Esta es la petición que necesitas programar en el backend
+        // GET /api/conversations/by-trip/:viajeId/unread-count/:userId
+        const res = await fetch(`/api/conversations/by-trip/${viajeId}/unread-count/${idbussines}`);
+        
+        if (!res.ok) {
+            throw new Error(`Error HTTP ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            return data.unreadCount || 0;
+        } else {
+            console.error('Backend error:', data.error);
+            return 0;
+        }
+    } catch (err) {
+        console.error('Error obteniendo mensajes perdidos por viaje:', err);
+        return 0;
+    }
+}
+
+// Obtener conteo total de viajes con mensajes perdidos
+async function obtenerViajesConMensajesPerdidos() {
+    try {
+        // IMPORTANTE: Esta es la petición que necesitas programar en el backend
+        // GET /api/conversations/by-user/:userId/unread-summary
+        const res = await fetch(`/api/conversations/by-user/${idbussines}/unread-summary`);
+        
+        if (!res.ok) {
+            throw new Error(`Error HTTP ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            misViajesUnreadCount = data.viajesConMensajes || 0;
+            
+            // Actualizar badge en pestaña
+            actualizarBadgePestana();
+            
+            return misViajesUnreadCount;
+        } else {
+            console.error('Backend error:', data.error);
+            return 0;
+        }
+    } catch (err) {
+        console.error('Error obteniendo resumen de mensajes perdidos:', err);
+        return 0;
+    }
+}
+
+function actualizarBadgePestana() {
+    if (misViajesUnreadCount > 0) {
+        misViajesBadgeElement.textContent = misViajesUnreadCount > 9 ? '9+' : misViajesUnreadCount;
+        misViajesBadgeElement.style.display = 'flex';
+    } else {
+        misViajesBadgeElement.style.display = 'none';
+    }
+}
+
 async function openChat(viaje) {
     try {
-        // deliveryRequestId = viaje.id, clientId = propietario del viaje, deliveryId = id del delivery logueado
         const deliveryRequestId = viaje.id;
         const clientId = viaje.propietario;
         const deliveryId = idbussines;
 
-        // marcar los sms como leidos
-
-
-      
-
-        // Crear/obtener conversación vía REST
+        // Crear/obtener conversación
         const resp = await fetch('/api/conversations/get-or-create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deliveryRequestId, clientId, deliveryId })
         });
+        
+        if (!resp.ok) throw new Error('Error de red');
+        
         const data = await resp.json();
         if (!data.success) throw new Error(data.message || 'No se pudo crear la conversación');
 
         currentConversationId = data.conversationId;
         currentReceiverId = clientId;
 
-          const answerbackend  = await fetch (`/api/messages/${2}/${currentConversationId}/read`);
-        
+        // Marcar mensajes como leídos
+        const answerbackend = await fetch(`/api/messages/${2}/${currentConversationId}/read`);
         const dataaux = await answerbackend.json();
 
-        if(!dataaux.success)
-        {
-            alert("hubo un error al marcar el sms como leido");
+        if (!dataaux.success) {
+            console.warn("No se pudieron marcar los mensajes como leídos");
         }
 
-        // Unirse a la sala de la conversación en Socket.IO
+        // Unirse a la sala de la conversación
         socket.emit('join_conversation', {
             conversationId: currentConversationId,
             userId: idbussines
@@ -211,37 +340,66 @@ async function openChat(viaje) {
         // Abrir modal
         chatModal.setAttribute('aria-hidden', 'false');
         chatInput.focus();
+        
+        // Actualizar badge inmediatamente
+        await obtenerViajesConMensajesPerdidos();
+        
     } catch (err) {
         console.error('Error abriendo chat:', err);
-        alert('No se pudo abrir el chat, intenta de nuevo.');
+        alert('No se pudo abrir el chat. Intenta de nuevo.');
     }
 }
 
 async function loadConversationMessages(conversationId) {
-    const resp = await fetch(`/api/conversations/${conversationId}/messages`);
-    const data = await resp.json();
-    chatMessages.innerHTML = '';
-    if (data.success && Array.isArray(data.messages)) {
-        data.messages.forEach(m => renderMessage(m));
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+    try {
+        const resp = await fetch(`/api/conversations/${conversationId}/messages`);
+        if (!resp.ok) throw new Error('Error cargando mensajes');
+        
+        const data = await resp.json();
+        chatMessages.innerHTML = '';
+        
+        if (data.success && Array.isArray(data.messages)) {
+            data.messages.forEach(m => renderMessage(m));
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    } catch (err) {
+        console.error('Error cargando mensajes:', err);
+        chatMessages.innerHTML = '<div class="error-msg">Error cargando mensajes</div>';
     }
 }
 
-// Enviar mensaje
 function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const text = String(input.value || '').trim();
     if (!text) return;
+    
+    if (!currentConversationId) {
+        alert('No hay conversación activa');
+        return;
+    }
+    
     socket.emit('send_message', {
         conversationId: currentConversationId,
         senderId: idbussines,
         message: text
     });
+    
+    // Renderizar mensaje localmente inmediatamente
+    const message = {
+        message: text,
+        created_at: new Date().toISOString(),
+        conversation_id: currentConversationId,
+        sender_id: idbussines,
+        is_read: true
+    };
+    
+    renderMessage(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
     input.value = '';
 }
 
-// Renderizar mensaje en el UI
-async function renderMessage(m) {
+function renderMessage(m) {
     const isMe = Number(m.sender_id) === Number(idbussines);
     const wrapper = document.createElement('div');
     wrapper.className = `msg ${isMe ? 'me' : 'other'}`;
@@ -256,32 +414,44 @@ async function renderMessage(m) {
     chatMessages.appendChild(meta);
 }
 
-// Cerrar chat
+// Cerrar chat y refrescar
 function closeChat() {
     chatModal.setAttribute('aria-hidden', 'true');
     chatMessages.innerHTML = '';
     currentConversationId = null;
     currentReceiverId = null;
+    
+    // Actualizar badge
+    obtenerViajesConMensajesPerdidos();
+    
+    // Refrescar la vista actual después de un breve delay
+    setTimeout(() => {
+        if (currentTab === 'disponibles') {
+            cargarViajes();
+        } else {
+            cargarMisViajes();
+        }
+    }, 300);
 }
-
-// Escuchar mensajes nuevos desde el servidor
-socket.on('new_message',async (msg)  => {
-    // Solo renderizamos si pertenece a la conversación actual
-    if (Number(msg.conversation_id) === Number(currentConversationId)) {
-       await renderMessage(msg);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-});
 
 function filtrarViajes() {
     const filtro = filterPrice.value;
     let viajesFiltrados = [...viajes];
+    
     switch (filtro) {
-        case 'mayor-menor': viajesFiltrados = viajes.sort((a, b) => b.precio - a.precio); break;
-        case 'menor-mayor': viajesFiltrados = viajes.sort((a, b) => a.precio - b.precio); break;
-        case 'mas-rapido': viajesFiltrados = viajes.sort((a, b) => new Date(a.fecha_salida) - new Date(b.fecha_salida)); break;
-        default: break;
+        case 'mayor-menor': 
+            viajesFiltrados.sort((a, b) => b.precio - a.precio); 
+            break;
+        case 'menor-mayor': 
+            viajesFiltrados.sort((a, b) => a.precio - b.precio); 
+            break;
+        case 'mas-rapido': 
+            viajesFiltrados.sort((a, b) => new Date(a.fecha_salida) - new Date(b.fecha_salida)); 
+            break;
+        default: 
+            break;
     }
+    
     mostrarViajes(viajesFiltrados);
 }
 
@@ -338,131 +508,147 @@ function ocultarErrorMisViajes() {
     errorMisViajesElement.style.display = 'none'; 
 }
 
+// Perfil y usuario
 function irAlPerfil() {
     window.location.href = `perfil/perfil.html#${window.location.hash.substring(1)}`;
 }
 
 async function obtenerid() {
-    const respuestaid = await fetch('/obtenerid', {
-        method:'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: namebussines })
-    });
-    const datosid = await respuestaid.json();
-    idbussines = datosid.id.id;
+    try {
+        const respuestaid = await fetch('/obtenerid', {
+            method:'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: namebussines })
+        });
+        const datosid = await respuestaid.json();
+        idbussines = datosid.id?.id;
+        
+        if (!idbussines) {
+            throw new Error('No se pudo obtener el ID del usuario');
+        }
+    } catch (error) {
+        console.error('Error obteniendo ID:', error);
+        throw error;
+    }
 }
 
 async function obteneruser(){
-    const respuesta = await fetch('/desencript', {
-        method:'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: codigo })
-    });
-    const datos = await respuesta.json();
-    namebussines = datos.users;
+    try {
+        const respuesta = await fetch('/desencript', {
+            method:'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: codigo })
+        });
+        const datos = await respuesta.json();
+        namebussines = datos.users;
+        
+        if (!namebussines) {
+            throw new Error('No se pudo obtener el nombre de usuario');
+        }
+    } catch (error) {
+        console.error('Error obteniendo usuario:', error);
+        throw error;
+    }
 }
 
 async function cargarFotoPerfil() {
-    await obteneruser();
-    await obtenerid();
-    await isactive();
-    
-    // Cargar viajes disponibles por defecto
-    await cargarViajes();
+    try {
+        const respuesta = await fetch(`/perfil/${idbussines}`);
+        const data = await respuesta.json();
 
-    const respuesta = await fetch(`/perfil/${idbussines}`);
-    const data = await respuesta.json();
-
-    if (data.success) {
-        document.getElementById('profileHeaderImage').src = data.perfil[0].fotoperfil || '';
-    } else {
-        console.error(data.message);
+        if (data.success) {
+            const img = document.getElementById('profileHeaderImage');
+            if (img) {
+                img.src = data.perfil[0]?.fotoperfil || '';
+            }
+        }
+    } catch (error) {
+        console.error('Error cargando foto de perfil:', error);
     }
 }
 
 async function isactive() {
-    const respuestaid = await fetch('/obtenerid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: namebussines })
-    });
-    const datosid = await respuestaid.json();
-    const estado = datosid.id.estado;
+    try {
+        const respuestaid = await fetch('/obtenerid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: namebussines })
+        });
+        const datosid = await respuestaid.json();
+        const estado = datosid.id?.estado;
 
-    if (estado == 4) {
-        window.location.href = `active/active.html#${codigo}`;
+        if (estado == 4) {
+            window.location.href = `active/active.html#${codigo}`;
+        }
+    } catch (error) {
+        console.error('Error verificando estado:', error);
     }
 }
 
 function formatearFecha(fechaISO) {
-    const fecha = new Date(fechaISO);
-    const opciones = {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: 'numeric', minute: '2-digit', hour12: true
-    };
-    return fecha.toLocaleDateString('es-ES', opciones);
+    try {
+        const fecha = new Date(fechaISO);
+        const opciones = {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: 'numeric', minute: '2-digit', hour12: true
+        };
+        return fecha.toLocaleDateString('es-ES', opciones);
+    } catch (error) {
+        return 'Fecha no disponible';
+    }
 }
 
-// Función para cambiar entre pestañas
+// Pestañas
 function cambiarTab(tab) {
-    // Remover clase active de todos los botones de pestañas
+    currentTab = tab;
+    
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    // Ocultar todos los contenidos de pestañas
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     
-    // Mostrar/ocultar filtros según la pestaña
     const filtersSection = document.getElementById('filtersSection');
     
     if (tab === 'disponibles') {
-        // Activar pestaña "Viajes Disponibles"
         document.getElementById('tabViajesDisponibles').classList.add('active');
         document.getElementById('viajesDisponiblesContent').classList.add('active');
-        filtersSection.style.display = 'grid'; // Mostrar filtros
-        
-        // Cargar viajes disponibles
+        filtersSection.style.display = 'grid';
         cargarViajes();
     } 
     else if (tab === 'misViajes') {
-        // Activar pestaña "Mis Viajes"
         document.getElementById('tabMisViajes').classList.add('active');
         document.getElementById('misViajesContent').classList.add('active');
-        filtersSection.style.display = 'none'; // Ocultar filtros
-        
-        // Cargar mis viajes
+        filtersSection.style.display = 'none';
         cargarMisViajes();
     }
 }
 
-// Función para cargar MIS VIAJES
+// Mis viajes
 async function cargarMisViajes() {
     mostrarLoadingMisViajes();
     
-    const idmisviajes = await obtenermisviajes();
-    
-    if (!idmisviajes || idmisviajes.length === 0) {
-        mostrarNoMisViajes();
-        ocultarLoadingMisViajes();
-        return;
-    }
-    
     try {
-        // Obtener todos los viajes
+        const idmisviajes = await obtenermisviajes();
+        
+        if (!idmisviajes || idmisviajes.length === 0) {
+            mostrarNoMisViajes();
+            ocultarLoadingMisViajes();
+            return;
+        }
+        
         const response = await fetch(`/viajes`);
         if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
         const data = await response.json();
 
         if (data.success) {
-            // Filtrar solo los viajes que están en mis viajes
             let viajesmostrar = data.viajes.filter(element => 
                 idmisviajes.includes(element.id)
             );
             
-            mostrarMisViajes(viajesmostrar);
+            await mostrarMisViajes(viajesmostrar);
         } else {
             throw new Error(data.message || 'Error al cargar los viajes');
         }
@@ -474,8 +660,7 @@ async function cargarMisViajes() {
     }
 }
 
-// Función para mostrar MIS VIAJES
-function mostrarMisViajes(viajesArray) {
+async function mostrarMisViajes(viajesArray) {
     if (viajesArray.length === 0) {
         mostrarNoMisViajes();
         return;
@@ -483,29 +668,95 @@ function mostrarMisViajes(viajesArray) {
 
     misViajesGrid.innerHTML = '';
 
-    viajesArray.forEach(viaje => {
-        const viajeCard = crearTarjetaViaje(viaje);
-        misViajesGrid.appendChild(viajeCard);
+    const viajesPromises = viajesArray.map(async (viaje) => {
+        return await crearTarjetaMisViajes(viaje);
+    });
+
+    const viajesCards = await Promise.all(viajesPromises);
+    
+    viajesCards.forEach(card => {
+        misViajesGrid.appendChild(card);
     });
     
-    // Asegurarse de que el grid sea visible
     misViajesGrid.style.display = 'grid';
     ocultarNoMisViajes();
     ocultarErrorMisViajes();
 }
 
-// Función para obtener IDs de mis viajes
+async function crearTarjetaMisViajes(viaje) {
+    const card = document.createElement('div');
+    card.className = 'viaje-card';
+
+    let unreadCount = 0;
+    try {
+        unreadCount = await obtenerMensajesPerdidosPorViaje(viaje.id);
+    } catch (error) {
+        console.error(`Error obteniendo mensajes perdidos para viaje ${viaje.id}:`, error);
+    }
+    
+    const hasUnread = unreadCount > 0;
+    
+    if (hasUnread) {
+        card.classList.add('unread');
+    }
+
+    card.innerHTML = `
+        <div class="viaje-header">
+            <span class="viaje-id">ID: ${viaje.id}</span>
+            <div class="viaje-precio">$${viaje.precio}</div>
+        </div>
+
+        <div class="viaje-ruta">
+            <div class="ruta-origen">
+                <strong>Salida:</strong>
+                <div class="ubicacion-detalle">${viaje.municipio_salida}, ${viaje.provincia_salida}</div>
+            </div>
+            <div class="ruta-destino">
+                <strong>Llegada:</strong>
+                <div class="ubicacion-detalle">${viaje.provincia_llegada}, ${viaje.municipio_llegada}</div>
+            </div>
+        </div>
+
+        <div class="viaje-fecha">
+            <strong>Fecha de salida:</strong> ${formatearFecha(viaje.fecha_salida)}
+        </div>
+
+        <div class="viaje-propietario">
+            <strong>Propietario:</strong> ${diccionarioUsuarios[viaje.propietario] || viaje.propietario}
+        </div>
+
+        <div class="viaje-detalles">
+            <h4>📋 Detalles </h4>
+            <p>${viaje.detalles_adicionales || 'Sin detalles adicionales'}</p>
+        </div>
+
+        <button class="chat-btn ${hasUnread ? 'unread' : ''}" data-viaje-id="${viaje.id}">
+            💬 SMS 
+            ${hasUnread ? `<span class="chat-badge">${unreadCount > 9 ? '9+' : unreadCount}</span>` : ''}
+        </button>
+    `;
+
+    const btn = card.querySelector('.chat-btn');
+    btn.addEventListener('click', () => openChat(viaje));
+
+    return card;
+}
+
 async function obtenermisviajes() {
     try {
         const answer = await fetch(`/api/conversations/by-user/${idbussines}`);
+        
+        if (!answer.ok) {
+            throw new Error(`Error HTTP ${answer.status}`);
+        }
+        
         const data = await answer.json();
 
         if (!data.success) {
-            console.error(data.message);
+            console.error('Backend error:', data.message);
             return [];
         }
 
-        // Usar Set para eliminar duplicados y luego convertirlo a Array
         const idsUnicos = [...new Set(
             data.conversations.map(element => element.delivery_request_id)
         )];

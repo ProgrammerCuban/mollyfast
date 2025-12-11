@@ -807,7 +807,7 @@ app.get('/api/conversations/:id/messages', async (req, res) => {
         const conversationId = req.params.id;
         const [rows] = await connection.promise().execute(
             `SELECT m.id, m.conversation_id, m.sender_id, m.message, m.is_read , m.is_read, m.created_at,
-                    u.usuario AS sender_name
+             u.usuario AS sender_name
              FROM messages m
              JOIN usuarios u ON m.sender_id = u.id
              WHERE m.conversation_id = ?
@@ -865,23 +865,107 @@ app.get('/api/conversations/by-trip/:tripId', async (req, res) => {
     }
 });
 
-// Endpoint: contador de mensajes por viaje
-app.get('/api/messages/count-by-trip/:tripId', async (req, res) => {
-    try {
-        const tripId = Number(req.params.tripId);
-        const [rows] = await connection.promise().execute(
-            `SELECT COUNT(m.id) AS total_messages
-             FROM messages m
-             JOIN conversations c ON m.conversation_id = c.id
-             WHERE c.delivery_request_id = ?`,
-            [tripId]
-        );
-        return res.json({ success: true, total: rows[0]?.total_messages || 0 });
-    } catch (err) {
-        console.error('❌ Error contando mensajes por viaje:', err);
-        return res.json({ success: false, message: 'No se pudo contar los mensajes' });
-    }
+// Endpoint: contador de mensajes por viaje para negocio
+app.get('/api/messages/count/viaje/negocio/:idviaje', async (req, res) => {
+  const idviaje = req.params.idviaje;
+
+    const [rows] = await connection.execute(
+      `SELECT SUM(cnl) AS total_cnl
+       FROM conversations
+       WHERE delivery_request_id = ?`,
+      [idviaje]
+    );
+
+    const totalCnl = rows[0].total_cnl || 0;
+
+    return res.json({ succes:true , data: totalCnl});
+    
 });
+
+// cantidad de sms perdidos por viajes para lso negocios
+app.get('/api/messages/count/chat/negocio/:idviaje', async (req, res) => {
+  const idviaje = req.params.idviaje;
+
+   const query = `SELECT 
+    COUNT(*) as total
+         FROM 
+    conversations
+      WHERE 
+    delivery_request_id = ? 
+    AND cnl > 0;`;
+
+    connection.query(query, [idviaje], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, total: results[0].total });
+        } else {
+            return res.json({ success: false, message: 'perfil no encontrado' });
+        }
+    });
+  
+});
+
+
+// cantidad de sms por chat con el id de la conversacion para negocios
+app.get('/api/messages/count/:conversationid', async (req, res) => {
+  const conversationid = req.params.conversationid;
+
+    const [rows] = await connection.execute(
+      `SELECT cnl AS total_cnl
+       FROM conversations
+       WHERE id = ?`,
+      [conversationid]
+    );
+
+    const totalCnl = rows[0].total_cnl || 0;
+
+    return res.json({ succes:true , total: totalCnl});
+    
+});
+
+// GET /api/conversations/:conversationId/unread-count
+app.get('/api/conversations/:conversationId/unread-count', async (req, res) => {
+        const conversationId = req.params.conversationId;
+  
+        const query = `SELECT * FROM  conversations WHERE id = ?`;
+
+    connection.query(query, [conversationId], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, unreadCount: results[0].cnl });
+        } else {
+            return res.json({ success: false, message: 'perfil no encontrado' });
+        }
+    });
+  
+});
+
+
+// POST /api/conversations/:conversationId/mark-as-read
+app.post('/api/conversations/:conversationId/mark-as-read', async (req, res) => {
+
+        const conversationId = req.params.conversationId;
+        const { userId } = req.body;
+        
+         const query =   `UPDATE conversations SET cnl = 0 WHERE id = ?`;
+
+    connection.query(query, [conversationId], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true,  message: 'Mensajes marcados como leídos' });
+        } else {
+            return res.json({ success: false, message: 'perfil no encontrado' });
+        }
+    });
+       
+});
+
 
 app.get('/api/messages/:id/:conversacionid/read', async (req, res) => {
   const id = Number(req.params.id);
@@ -911,6 +995,56 @@ app.get('/api/messages/:id/:conversacionid/read', async (req, res) => {
             return res.json({success:false});
     }
 });
+
+
+app.get('/api/conversations/by-trip/:viajeId/unread-count/:userId',async(req,res)=>{
+        const conversationId = req.params.conversationId;
+        const { userId } = req.body;
+        
+         const query =   `SELECT * FROM conversations WHERE id = ?`;
+
+    connection.query(query, [conversationId], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+
+            return res.json({ success: true,  unreadCount: results[0].dnl });
+        } else {
+            return res.json({ success: false, message: 'errorrrrrrrrrr' });
+        }
+    });
+});
+
+ //GET /api/conversations/by-user/:userId/unread-summary
+// Devuelve: { success: boolean, viajesConMensajes: number }
+
+app.get('/api/conversations/by-user/:userId/unread-summary', async (req, res) => {
+  const userid = req.params.userId;
+
+     const query = `SELECT 
+    COUNT(*) as total
+         FROM 
+    conversations
+      WHERE 
+    delivery_id = ? 
+    AND dnl > 0;`;
+
+    connection.query(query, [userid], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error' });
+        }
+        if (results.length > 0) {
+            return res.json({ success: true, viajesConMensajes: results[0].total });
+        } else {
+            return res.json({ success: false, message: 'error al buscar la cantidad de sms perdidos por viaje' });
+        }
+    });
+  
+
+});
+
+
 
 // ======================= SOCKET.IO CHAT =======================
 

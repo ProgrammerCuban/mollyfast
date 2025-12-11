@@ -123,6 +123,11 @@ body {
     border-radius: 50%;
 }
 
+.viaje-card.green {
+    border: 2px solid green;
+    background-color: #e6ffe6;
+}
+
 /* Filtros responsivos */
 .filters {
     display: grid;
@@ -320,7 +325,6 @@ body {
     border-radius: 16px;
     position: relative;
 }
-
 
 .ruta-origen, .ruta-destino { 
     padding: 4px; 
@@ -676,7 +680,6 @@ body {
     border: 2px solid #e5e7eb;
 }
 
-
 /* Header de modal */
 .modal-header {
     padding: clamp(16px, 3vw, 24px);
@@ -841,7 +844,7 @@ body {
 }
 
 /* ==================== */
-/* MODAL DE CHAT */
+/* MODAL DE CHAT - CORREGIDO */
 /* ==================== */
 
 .chat-dialog {
@@ -858,16 +861,16 @@ body {
     background: #f0f2f5;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
 }
 
 .chat-messages {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
 }
 
-/* Mensajes de chat */
+/* Mensajes base */
 .msg {
     max-width: 80%;
     padding: 12px 16px;
@@ -876,6 +879,8 @@ body {
     word-wrap: break-word;
     animation: messageIn 0.3s ease-out;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes messageIn {
@@ -889,28 +894,29 @@ body {
     }
 }
 
-/* Mensajes enviados por mí */
-.msg-mine {
+/* Mensajes enviados por mí (usando clase .me) */
+.msg.me {
     align-self: flex-end;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     border-bottom-right-radius: 4px;
 }
 
-.msg-mine .msg-meta {
+.msg.me .msg-meta {
     color: rgba(255, 255, 255, 0.8);
     text-align: right;
 }
 
-/* Mensajes recibidos */
-.msg-other {
+/* Mensajes recibidos (usando clase .other) */
+.msg.other {
     align-self: flex-start;
     background: white;
     color: #333;
     border-bottom-left-radius: 4px;
+    border: 1px solid #e0e0e0;
 }
 
-.msg-other .msg-meta {
+.msg.other .msg-meta {
     color: #666;
 }
 
@@ -1297,6 +1303,11 @@ body {
         width: 100%;
         max-width: 300px;
     }
+    
+    /* Chat responsive */
+    .msg {
+        max-width: 90%;
+    }
 }
 
 /* Móviles pequeños */
@@ -1457,16 +1468,17 @@ body {
         background: #1a202c;
     }
     
-    .msg-other {
+    .msg.other {
         background: #2d3748;
         color: #e0e0e0;
+        border-color: #4a5568;
     }
     
-    .msg-mine {
+    .msg.me {
         background: linear-gradient(135deg, #4a6cf7, #6a11cb);
     }
     
-    .msg-other .msg-meta {
+    .msg.other .msg-meta {
         color: #a0aec0;
     }
     
@@ -1610,5 +1622,109 @@ body {
     
     ::-webkit-scrollbar-thumb {
         background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+    }
+}
+
+/* ==================== */
+/* CORRECCIONES ESPECÍFICAS PARA EL CHAT */
+/* ==================== */
+
+/* Asegurar que los mensajes se muestren correctamente */
+.msg.me {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.msg.other {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* Separación clara entre mensajes */
+.chat-messages > * {
+    margin-bottom: 4px;
+}
+
+/* Mejorar la visibilidad de los bordes */
+.msg {
+    border: 1px solid transparent;
+}
+
+.msg.other {
+    border-color: #e0e0e0;
+}
+
+.msg.me {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Efecto de sombra para mejor diferenciación */
+.msg.me {
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+}
+
+.msg.other {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== */
+/* BADGE DE MENSAJES NO LEÍDOS */
+/* ==================== */
+
+.unread-badge {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    animation: pulseBadge 2s infinite;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+    cursor: default;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.delivery-row.has-unread {
+    border-left: 4px solid #e74c3c;
+    background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+    animation: highlightRow 1s ease;
+}
+
+@keyframes highlightRow {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* Modo oscuro para mensajes no leídos */
+@media (prefers-color-scheme: dark) {
+    .delivery-row.has-unread {
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+        border-left-color: #e74c3c;
+    }
+    
+    .unread-badge {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.6);
+    }
+}
+
+/* Responsive para el badge */
+@media (max-width: 480px) {
+    .unread-badge {
+        font-size: 0.7rem;
+        min-width: 20px;
+        height: 20px;
+        border-radius: 10px;
     }
 }
