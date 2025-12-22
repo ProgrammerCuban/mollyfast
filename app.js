@@ -204,6 +204,39 @@ app.get('/usuarios-id', async(req, res) => {
     });
 });
 
+app.get('/api/deliveryescogido-id/:viajeid/:conversationid', async(req, res) => {
+
+    const {viajeid, conversationid} = req.params;
+
+    const query = `DELETE FROM messages 
+    WHERE conversation_id IN (
+    SELECT id 
+    FROM conversations 
+    WHERE delivery_request_id = ? 
+    AND id != ? );`;
+
+    connection.query(query,[viajeid,conversationid], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query1' });
+        }
+    });
+
+       const query2 =`DELETE FROM conversations 
+       WHERE delivery_request_id = ? 
+       AND id != ?;`;
+        
+        connection.query(query2,[viajeid,conversationid], (error, results) => {
+        if (error) {
+            return res.json({ success: false, message: 'Error en la query2' });
+        }
+
+        return res.json({success:true});
+    });
+
+
+});
+
+
 app.get('/api/get-solicitudes', async(req, res) => {
     const query = 'SELECT carnet, fotocarnet, selfie, idowner, foto_moto FROM solicitudes';
 
@@ -1046,7 +1079,7 @@ app.get('/api/conversations/by-user/:userId/unread-summary', async (req, res) =>
 
 
 
-// ======================= SOCKET.IO CHAT =======================
+// ======================= SOCKET.IO =======================
 
 const activeUsers = new Map();
 
@@ -1124,7 +1157,6 @@ io.on('connection', (socket) => {
         [senderId, senderId, conversationId]
     );
    }
-
             console.log(`📨 Mensaje enviado en conversación ${conversationId} por usuario ${senderId}`);
         } catch (error) {
             console.error('❌ Error enviando mensaje:', error);
@@ -1144,13 +1176,16 @@ io.on('connection', (socket) => {
     });
 });
 
-// ======================= SERVIDOR =======================
+function smsperdido(id)
+ {
+    socket.emit(`sms/perdido/${id}`, true);
+ }
+
+// ======================== SERVIDOR ========================
+
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
-    console.log(`📧 Endpoint de email: http://localhost:${PORT}/api/email/send-verification`);
-    console.log(`🧪 Endpoint de prueba: http://localhost:${PORT}/api/email/test`);
-    console.log('🔧 Verificando configuración de email...');
 });
 
 // ======================= EMAIL =======================

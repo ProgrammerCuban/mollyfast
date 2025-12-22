@@ -5,8 +5,9 @@
         "titleBar.activeForeground": "#F6FDF3"
     },
     "editor.folding": true,
-    "editor.foldingStrategy": "indentation",
     "editor.foldingImportsByDefault": true,
     "editor.foldingMaximumRegions": 5000,
-    "editor.showFoldingControls": "mouseover"
+    "editor.foldingStrategy": "auto",
+     "editor.foldImports": true,
+    "editor.showFoldingControls": "always"
 }

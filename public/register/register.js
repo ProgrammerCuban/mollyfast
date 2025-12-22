@@ -3,32 +3,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // (function() {
     //     emailjs.init("J9WF3KPIxRDxlheWG");
     // })();
-
     // Elementos del DOM
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const registerForm = document.getElementById('registerForm');
-    const userEmailDisplay = document.getElementById('userEmailDisplay');
-    const verificationCode = document.getElementById('verificationCode');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const resendBtn = document.getElementById('resendBtn');
-    const verificationMessage = document.getElementById('verificationMessage');
-    const submitBtn = document.getElementById('submitBtn');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoading = submitBtn.querySelector('.btn-loading');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const registerForm = document.getElementById('registerForm');
+const userEmailDisplay = document.getElementById('userEmailDisplay');
+const verificationCode = document.getElementById('verificationCode');
+const verifyBtn = document.getElementById('verifyBtn');
+const resendBtn = document.getElementById('resendBtn');
+const verificationMessage = document.getElementById('verificationMessage');
+const submitBtn = document.getElementById('submitBtn');
+const btnText = submitBtn.querySelector('.btn-text');
+const btnLoading = submitBtn.querySelector('.btn-loading');
 
-    let userData = {};
-    let generatedCode = '';
+let userData = {};
+let generatedCode = '';
 
     // Generar código de verificación
-    function generateVerificationCode() {
+function generateVerificationCode() {
         return Math.floor(100000 + Math.random() * 900000).toString();
-    }
+}
 
     
 
     // Envío del formulario de registro
-    registerForm.addEventListener('submit', async function(e) {
+registerForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const formData = new FormData(this);
@@ -87,10 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             showLoading(false);
         }
-    });
+});
 
     // Verificar código
-    verifyBtn.addEventListener('click', async function() {
+verifyBtn.addEventListener('click', async function() {
         const code = verificationCode.value.trim();
         
         if (!code || code.length !== 6) {
@@ -123,10 +122,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             showVerificationLoading(false);
         }
-    });
+});
 
     // Reenviar código
-    resendBtn.addEventListener('click', async function() {
+resendBtn.addEventListener('click', async function() {
         showVerificationMessage('Enviando nuevo código...', 'success');
         resendBtn.disabled = true;
         
@@ -146,18 +145,18 @@ document.addEventListener('DOMContentLoaded', function() {
             showVerificationMessage('Error al reenviar el código: ' + error.message, 'error');
             resendBtn.disabled = false;
         }
-    });
+});
 
     // Permitir enviar con Enter en el código de verificación
-    verificationCode.addEventListener('keypress', function(e) {
+verificationCode.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             verifyBtn.click();
         }
-    });
+});
   
 
     // ✅ NUEVA FUNCIÓN: Enviar código usando tu backend
-    async function sendVerificationCode(userEmail) {
+async function sendVerificationCode(userEmail) {
         try {
             const response = await fetch('/api/email/send-verification', {
                 method: 'POST',
@@ -184,10 +183,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('❌ Error enviando código:', error);
             throw new Error('No se pudo enviar el código de verificación: ' + error.message);
         }
-    }
+}
 
     // Función para registrar usuario en tu backend
-    async function registerUserInBackend(userData) {
+async function registerUserInBackend(userData) {
             // Aquí va tu llamada REAL al backend para crear el usuario
             const response = await fetch('/api/register', { // Cambia por tu endpoint
                 method: 'POST',
@@ -205,10 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             alert(data.message);     
-    }
+}
 
     // Funciones auxiliares de UI
-    function showLoading(loading) {
+function showLoading(loading) {
         if (loading) {
             btnText.style.display = 'none';
             btnLoading.style.display = 'block';
@@ -218,14 +217,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btnLoading.style.display = 'none';
             submitBtn.disabled = false;
         }
-    }
+}
 
-    function showVerificationLoading(loading) {
+function showVerificationLoading(loading) {
         verifyBtn.disabled = loading;
         verifyBtn.textContent = loading ? 'Verificando...' : 'Verificar Código';
-    }
+}
 
-    function showMessage(text, type) {
+function showMessage(text, type) {
         const existingMessage = document.querySelector('.message-temp');
         if (existingMessage) existingMessage.remove();
 

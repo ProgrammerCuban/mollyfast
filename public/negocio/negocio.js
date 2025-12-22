@@ -95,6 +95,28 @@ async function carga(viajes) {
 
     for (const viaje of viajes) {
         const count = await obtenerConteoMensajesPorViaje(viaje.id);
+        
+        // Formatear la fecha para mostrar en formato día/mes/año - hora:minutos
+        let fechaFormateada = '';
+        if (viaje.fecha_salida) {
+            try {
+                const fecha = new Date(viaje.fecha_salida);
+                if (!isNaN(fecha.getTime())) {
+                    // Formato: día/mes/año - hora:minutos
+                    const dia = fecha.getDate().toString().padStart(2, '0');
+                    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                    const anio = fecha.getFullYear();
+                    const horas = fecha.getHours().toString().padStart(2, '0');
+                    const minutos = fecha.getMinutes().toString().padStart(2, '0');
+                    fechaFormateada = `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
+                } else {
+                    fechaFormateada = viaje.fecha_salida;
+                }
+            } catch (e) {
+                fechaFormateada = viaje.fecha_salida;
+            }
+        }
+
         const viajeHTML = `
             <div class="viaje-card ${count > 0 ? 'green' : ''}" id="viaje-card-${viaje.id}">
                 <div class="viaje-header">
@@ -116,7 +138,7 @@ async function carga(viajes) {
                 </div>
 
                 <div class="viaje-fecha">
-                    <strong>Fecha de salida:</strong> ${viaje.fecha_salida || ''}
+                    <strong>Fecha y hora de salida:</strong> ${fechaFormateada}
                 </div>
 
                 <div class="viaje-detalles">
@@ -222,11 +244,12 @@ async function abrirListaDeliverys(tripId) {
         setLoading(true);
         const res = await fetch(`/api/conversations/by-trip/${tripId}`);
         const data = await res.json();
-        setLoading(false);
         if (data.success) {
             await renderModalDeliverys(data.deliveries || []);
             await actualizarContadorTrip(tripId);
+            setLoading(false);
         } else {
+            setLoading(false);
             alert(data.message || 'No se pudo cargar la lista de interesados');
         }
     } catch (err) {
@@ -255,6 +278,30 @@ async function renderModalDeliverys(deliveries) {
         document.body.insertAdjacentHTML('beforeend', html);
         modal = document.getElementById('deliveryListModal');
     }
+
+    // Agregar estilos CSS solo para el botón de aprobación
+    const approveStyle = document.createElement('style');
+    approveStyle.textContent = `
+        .delivery-approve {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .delivery-approve:hover {
+            background-color: #218838;
+            transform: scale(1.1);
+        }
+    `;
+    document.head.appendChild(approveStyle);
 
     const list = modal.querySelector('#deliveryList');
     list.innerHTML = '';
@@ -305,6 +352,7 @@ async function renderModalDeliverys(deliveries) {
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <button class="delivery-open" onclick="abrirChatConDelivery(${d.conversation_id}, ${d.delivery_id}, '${escapeHtml(d.delivery_name)}')">Abrir chat</button>
+                        <button class="delivery-approve" onclick="deliveryelegido(${d.conversation_id}, ${d.delivery_id}, ${d.delivery_request_id})" title="Aprobar delivery">✅</button>
                         ${unreadBadgeHTML}
                     </div>
                 </div>
@@ -315,6 +363,31 @@ async function renderModalDeliverys(deliveries) {
 
     modal.style.display = 'flex';
 }
+
+async function deliveryelegido(conversationid, deliveryid, viajeid)
+{
+   const okey = confirm("seguro que quiere elegir a este usuario para el viaje?. si lo elige no podrá elegir a otro más.");
+   if(!okey) return;
+
+   setLoading(true);
+
+   const answer = await fetch(`/api/deliveryescogido-id/${viajeid}/${conversationid}`);
+
+   const data = await answer.json();
+
+    setLoading(false);
+
+   if(!data.success)
+   {
+       alert(data.message);
+       return ;
+   }
+
+   alert("delivery elegido correctamente")
+
+   cerrarDeliveryModal();
+}
+
 
 function cerrarDeliveryModal() {
     const modal = document.getElementById('deliveryListModal');
@@ -556,6 +629,11 @@ function irAFormulario() {
                             <div class="error-message">Por favor selecciona una fecha</div>
                         </div>
                         <div class="form-group">
+                            <label for="hora_salida">Hora de Salida:</label>
+                            <input type="time" id="hora_salida" required>
+                            <div class="error-message">Por favor selecciona una hora</div>
+                        </div>
+                        <div class="form-group">
                             <label for="precio">Precio (CUP):</label>
                             <input type="number" id="precio" step="0.01" min="0" placeholder="Ej: 150.00" required>
                             <div class="error-message">Por favor ingresa un precio válido</div>
@@ -655,6 +733,12 @@ function inicializarFormulario() {
     const fechaInput = document.getElementById('fecha_salida');
     const hoy = new Date().toISOString().split('T')[0];
     fechaInput.min = hoy;
+    
+    // Establecer hora por defecto a la hora actual
+    const horaInput = document.getElementById('hora_salida');
+    const ahora = new Date();
+    const horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
+    horaInput.value = horaActual;
 
     cargarProvincias();
 }
@@ -677,12 +761,16 @@ async function guardarNuevoViaje(event) {
     const provincia_llegada = document.getElementById('provincia_llegada').value;
     const municipio_llegada = document.getElementById('municipio_llegada').value;
     const hasta = document.getElementById('hasta').value;
-    const fecha_salida = document.getElementById('fecha_salida').value;
+    const fecha = document.getElementById('fecha_salida').value;
+    const hora = document.getElementById('hora_salida').value;
 
-    if (!precio || !detalles || !provincia_salida || !municipio_salida || !desde || !provincia_llegada || !municipio_llegada || !hasta || !fecha_salida) {
+    if (!precio || !detalles || !provincia_salida || !municipio_salida || !desde || !provincia_llegada || !municipio_llegada || !hasta || !fecha || !hora) {
         alert('⚠️ Por favor completa todos los campos');
         return;
     }
+
+    // Combinar fecha y hora en un solo string
+    const fecha_salida = `${fecha}T${hora}:00`;
 
     const nuevoViaje = {
         propietario: idbussines,
