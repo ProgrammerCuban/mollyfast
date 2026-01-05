@@ -1,0 +1,2 @@
+- falta poner en verde los vajes que tengas sms perdidos en los deliverys
+- quitar los sms dobles que envias en los deliverys

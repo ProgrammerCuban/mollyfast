@@ -124,6 +124,7 @@ app.get('/check-session', (req, res) => {
     }
 });
 
+// api para obtener un viaje por el id 
 app.get('/viajes/:id', (req, res) => {
     const id = req.params.id;
     const query = 'SELECT * FROM viajes WHERE propietario = ?';
@@ -140,6 +141,7 @@ app.get('/viajes/:id', (req, res) => {
     });
 });
 
+// api para obtener un perfil por el id 
 app.get('/perfil/:id', (req, res) => {
     const id = req.params.id;
     const query = 'SELECT * FROM usuarios WHERE id = ?';
@@ -156,6 +158,7 @@ app.get('/perfil/:id', (req, res) => {
     });
 });
 
+// api para obtener todos los viajes 
 app.get('/viajes', async(req, res) => {
     const query = `
         SELECT 
@@ -187,6 +190,7 @@ app.get('/viajes', async(req, res) => {
     });
 });
 
+// api para obetener los nombres y los id de todos los uduarios 
 app.get('/usuarios-id', async(req, res) => {
     const query = 'SELECT id, usuario FROM usuarios';
 
@@ -204,6 +208,7 @@ app.get('/usuarios-id', async(req, res) => {
     });
 });
 
+// api para seleccionar el delivery que escogieron para el viaje y borrar las otras conversaciones ocn los otros deliverys 
 app.get('/api/deliveryescogido-id/:viajeid/:conversationid', async(req, res) => {
 
     const {viajeid, conversationid} = req.params;
@@ -236,7 +241,7 @@ app.get('/api/deliveryescogido-id/:viajeid/:conversationid', async(req, res) => 
 
 });
 
-
+// api que devuelve todad las solicitudes disponiboles de inicio de sesion
 app.get('/api/get-solicitudes', async(req, res) => {
     const query = 'SELECT carnet, fotocarnet, selfie, idowner, foto_moto FROM solicitudes';
 
@@ -252,6 +257,7 @@ app.get('/api/get-solicitudes', async(req, res) => {
     });
 });
 
+//api para la autenticacion de imagekit que sirve para subir la foto 
 app.get('/imagekit-auth', (req, res) => {
     const ImageKit = require('imagekit');
 
@@ -265,6 +271,7 @@ app.get('/imagekit-auth', (req, res) => {
     res.send(authenticationParameters);
 });
 
+//api para enviar el email de codigo de verificacion al usuario 
 app.post('/api/email/send-verification', async(req, res) => {
     console.log('📨 Solicitud recibida en /api/email/send-verification');
 
@@ -325,6 +332,7 @@ app.post('/api/email/send-verification', async(req, res) => {
     }
 });
 
+// api para enviar gmail que su solicitud de inicio de sesion fue aceptada 
 app.post('/api/email/solicitud-aceptada', async(req, res) => {
     try {
         const { userEmail } = req.body;
@@ -375,6 +383,7 @@ app.post('/api/email/solicitud-aceptada', async(req, res) => {
     }
 });
 
+//api para verificar que el usuario y la contrasena son correctos 
 app.post('/loginsecion', (req, res) => {
     const { user, pass } = req.body;
 
@@ -407,6 +416,7 @@ app.post('/loginsecion', (req, res) => {
     });
 });
 
+// api para desenciptar el nombre de usuario
 app.post('/desencript', (req, res) => {
     const { code } = req.body;
     const user = desencriptarSimple(code);
@@ -415,6 +425,7 @@ app.post('/desencript', (req, res) => {
     });
 });
 
+// api para verificar la contrasena del admin 
 app.post('/api/pass-admin', (req, res) => {
     const { pass } = req.body;
 
@@ -432,6 +443,7 @@ app.post('/api/pass-admin', (req, res) => {
     }
 });
 
+// api para guardar los datos del usuario que se registro 
 app.post('/api/register', (req, res) => {
     const { username, email, password, delivery } = req.body;
 
@@ -470,6 +482,7 @@ app.post('/api/register', (req, res) => {
     });
 });
 
+// api para subir la solicitud de inicio de sesion 
 app.post('/api/subir-solicitud', (req, res) => {
     const { carnet, fotocarnet, selfie, fotomoto, idowner } = req.body;
 
@@ -488,6 +501,7 @@ app.post('/api/subir-solicitud', (req, res) => {
     });
 });
 
+// api para encriptar el nombre de usuario
 app.post('/encript', (req, res) => {
     const { user } = req.body;
     const code = encriptarSimple(user);
@@ -497,6 +511,7 @@ app.post('/encript', (req, res) => {
     });
 });
 
+// api para obtener el id de un nombre de usuario 
 app.post('/obtenerid', (req, res) => {
     const { user } = req.body;
     const query = 'SELECT * FROM usuarios WHERE usuario = ?';
@@ -510,6 +525,7 @@ app.post('/obtenerid', (req, res) => {
     });
 });
 
+// api que devuelve si hay solicitud de un usuario o no 
 app.post('/api/solicitud-idowner', (req, res) => {
     const { idowner } = req.body;
     const query = 'SELECT * FROM solicitudes WHERE idowner = ?';
@@ -523,6 +539,7 @@ app.post('/api/solicitud-idowner', (req, res) => {
     });
 });
 
+// api para guardar los viajes en la bd 
 app.post('/guardar-viaje', (req, res) => {
     const { id, propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, hasta, municipio_llegada, fecha_salida } = req.body;
 
@@ -572,6 +589,7 @@ app.post('/guardar-viaje', (req, res) => {
     });
 });
 
+// api para aceptar la solicitud de un usuario 
 app.post('/solicitud-aceptada', (req, res) => {
     const { idowner } = req.body;
 
@@ -597,6 +615,7 @@ app.post('/solicitud-aceptada', (req, res) => {
     });
 });
 
+// api para cambiar foto de un usuario 
 app.post('/change-profile-photo', async(req, res) => {
     const { id, fotoUrl } = req.body;
 
@@ -617,6 +636,7 @@ app.post('/change-profile-photo', async(req, res) => {
     });
 });
 
+// api para eliminar un viaje en especifico 
 app.delete('/eliminar-viaje/:id', (req, res) => {
     const idViaje = req.params.id;
 
@@ -647,6 +667,7 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
     });
 });
 
+// api para eliminar una solicitud 
 app.delete('/eliminar-solicitud/:id', (req, res) => {
     const idowner = req.params.id;
 
@@ -675,6 +696,7 @@ app.delete('/eliminar-solicitud/:id', (req, res) => {
     });
 });
 
+// api para cambiar un nombre de usuario 
 app.put('/change-username', (req, res) => {
     const { id, username } = req.body;
 
@@ -733,6 +755,7 @@ app.put('/change-username', (req, res) => {
     });
 });
 
+// api para cambiar contrasena de un usuario
 app.put('/change-password', (req, res) => {
     const { id, pass } = req.body;
 
@@ -771,8 +794,7 @@ app.put('/change-password', (req, res) => {
     });
 });
 
-// ======================= UTILIDADES =======================
-
+// funcion para encriptar
 function encriptarSimple(texto) {
     let resultado = '';
     for (let i = 0; i < texto.length; i++) {
@@ -781,6 +803,7 @@ function encriptarSimple(texto) {
     return Buffer.from(resultado, 'binary').toString('base64');
 }
 
+//
 function desencriptarSimple(textoEncriptado) {
     const textoBase64 = Buffer.from(textoEncriptado, 'base64').toString('binary');
     let resultado = '';
@@ -1031,20 +1054,20 @@ app.get('/api/messages/:id/:conversacionid/read', async (req, res) => {
 
 
 app.get('/api/conversations/by-trip/:viajeId/unread-count/:userId',async(req,res)=>{
-        const conversationId = req.params.conversationId;
-        const { userId } = req.body;
+        const viajeId = req.params.viajeId;
+        const userId = req.params.userId;
         
-         const query =   `SELECT * FROM conversations WHERE id = ?`;
+         const query =   `SELECT * FROM conversations WHERE delivery_request_id = ? AND delivery_id = ?`;
 
-    connection.query(query, [conversationId], (error, results) => {
+    connection.query(query, [viajeId,userId], (error, results) => {
         if (error) {
-            return res.json({ success: false, message: 'Error' });
+            return res.json({ success: false, error: 'Error' });
         }
         if (results.length > 0) {
 
             return res.json({ success: true,  unreadCount: results[0].dnl });
         } else {
-            return res.json({ success: false, message: 'errorrrrrrrrrr' });
+            return res.json({ success: true, error: 'errorrrrrrrrrr' });
         }
     });
 });
