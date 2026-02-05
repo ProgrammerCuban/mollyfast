@@ -222,15 +222,8 @@ app.get('/check-session', (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // api para obtener un viaje por el id 
-app.get('/viajes/:id', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.get('/viajes/:id', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const id = req.params.id;
     const cacheKey = `viaje_${id}`;
     
@@ -255,15 +248,7 @@ app.get('/viajes/:id', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para obtener un perfil por el id 
-app.get('/perfil/:id', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.get('/perfil/:id', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const id = req.params.id;
     const cacheKey = `perfil_${id}`;
     
@@ -288,23 +273,7 @@ app.get('/perfil/:id', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para obtener todos los viajes 
-app.get('/viajes', generalLimiter, (req, res) => {
-    const cacheKey = 'viajes_todos';
-    
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        console.log("✅ Viajes encontrados (caché)");
-        return res.json({ success: true, viajes: cachedData, cached: true });
-    }
-    
-<<<<<<< HEAD
-=======
 app.get('/viajes', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const query = `
         SELECT 
             id,
@@ -338,26 +307,10 @@ app.get('/viajes', async(req, res) => {
         });
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
+
 // api para obetener los nombres y los id de todos los usuarios 
-app.get('/usuarios-id', generalLimiter, (req, res) => {
-    const cacheKey = 'usuarios_ids';
-    
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        console.log("✅ Usuarios encontrados (caché)");
-        return res.json({ success: true, usuarios: cachedData, cached: true });
-    }
-    
-<<<<<<< HEAD
-=======
+
 app.get('/usuarios-id', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const query = 'SELECT id, usuario FROM usuarios';
 
     ejecutarQuery(query)
@@ -377,19 +330,9 @@ app.get('/usuarios-id', async(req, res) => {
         });
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // api para seleccionar el delivery que escogieron para el viaje y borrar las otras conversaciones con los otros deliverys 
 app.get('/api/deliveryescogido-id/:viajeid/:conversationid', generalLimiter, async (req, res) => {
     const { viajeid, conversationid } = req.params;
-=======
-app.get('/api/deliveryescogido-id/:viajeid/:conversationid', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
-// api para seleccionar el delivery que escogieron para el viaje y borrar las otras conversaciones con los otros deliverys 
-app.get('/api/deliveryescogido-id/:viajeid/:conversationid', generalLimiter, async (req, res) => {
-    const { viajeid, conversationid } = req.params;
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
 
     try {
         // Primera query
@@ -421,26 +364,8 @@ app.get('/api/deliveryescogido-id/:viajeid/:conversationid', generalLimiter, asy
     }
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
-// api que devuelve todas las solicitudes disponibles de inicio de sesion
-app.get('/api/get-solicitudes', generalLimiter, (req, res) => {
-    const cacheKey = 'solicitudes';
-    
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        return res.json({ success: true, usuarios: cachedData, cached: true });
-    }
-    
-<<<<<<< HEAD
-=======
 
 app.get('/api/get-solicitudes', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const query = 'SELECT carnet, fotocarnet, selfie, idowner, foto_moto FROM solicitudes';
 
     ejecutarQuery(query)
@@ -457,15 +382,9 @@ app.get('/api/get-solicitudes', async(req, res) => {
         });
 });
 
-<<<<<<< HEAD
 //api para la autenticacion de imagekit que sirve para subir la foto 
-app.get('/imagekit-auth', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.get('/imagekit-auth', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const ImageKit = require('imagekit');
 
     const imagekit = new ImageKit({
@@ -538,15 +457,8 @@ app.post('/api/email/send-verification', async(req, res) => {
     }
 });
 
-<<<<<<< HEAD
-// api para enviar gmail que su solicitud de inicio de sesion fue aceptada 
-app.post('/api/email/solicitud-aceptada', emailLimiter, async(req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/api/email/solicitud-aceptada', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     try {
         const { userEmail } = req.body;
 
@@ -596,15 +508,8 @@ app.post('/api/email/solicitud-aceptada', async(req, res) => {
     }
 });
 
-<<<<<<< HEAD
-//api para verificar que el usuario y la contrasena son correctos 
-app.post('/loginsecion', loginLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/loginsecion', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { user, pass } = req.body;
 
     console.log(`usuario ${user} se esta logueando`);
@@ -641,17 +546,10 @@ app.post('/loginsecion', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+// api para desencriptar el nombre de usuario
+
 // api para desencriptar el nombre de usuario
 app.post('/desencript', generalLimiter, (req, res) => {
-=======
-app.post('/desencript', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
-// api para desencriptar el nombre de usuario
-app.post('/desencript', generalLimiter, (req, res) => {
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { code } = req.body;
     const user = desencriptarSimple(code);
     return res.json({
@@ -659,15 +557,8 @@ app.post('/desencript', generalLimiter, (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-// api para verificar la contrasena del admin 
-app.post('/api/pass-admin', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/api/pass-admin', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { pass } = req.body;
 
     if (pass == "C27PZXMv") {
@@ -684,15 +575,9 @@ app.post('/api/pass-admin', (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 // api para guardar los datos del usuario que se registro 
-app.post('/api/register', registerLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/api/register', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { username, email, password, delivery } = req.body;
 
     const checkQuery = 'SELECT id FROM usuarios WHERE usuario = ? OR gmail = ?';
@@ -730,15 +615,8 @@ app.post('/api/register', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para subir la solicitud de inicio de sesion 
-app.post('/api/subir-solicitud', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/api/subir-solicitud', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { carnet, fotocarnet, selfie, fotomoto, idowner } = req.body;
 
     const insertQuery = 'INSERT INTO solicitudes (carnet, fotocarnet, selfie, foto_moto, idowner) VALUES (?, ?, ?, ?, ?)';
@@ -762,15 +640,8 @@ app.post('/api/subir-solicitud', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para encriptar el nombre de usuario
-app.post('/encript', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/encript', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { user } = req.body;
     const code = encriptarSimple(user);
     console.log(code);
@@ -779,15 +650,9 @@ app.post('/encript', (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-// api para obtener el id de un nombre de usuario 
-app.post('/obtenerid', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/obtenerid', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
+
     const { user } = req.body;
     const cacheKey = `usuario_${user}`;
     
@@ -812,15 +677,8 @@ app.post('/obtenerid', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
 // api que devuelve si hay solicitud de un usuario o no 
-app.post('/api/solicitud-idowner', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.post('/api/solicitud-idowner', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { idowner } = req.body;
     const query = 'SELECT * FROM solicitudes WHERE idowner = ?';
 
@@ -837,15 +695,9 @@ app.post('/api/solicitud-idowner', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
 // api para guardar los viajes en la bd 
-app.post('/guardar-viaje', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.post('/guardar-viaje', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { id, propietario, precio, detalles, provincia_salida, municipio_salida, desde, provincia_llegada, hasta, municipio_llegada, fecha_salida } = req.body;
 
     let fechaFormateada = fecha_salida;
@@ -901,15 +753,8 @@ app.post('/guardar-viaje', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
 // api para aceptar la solicitud de un usuario 
-app.post('/solicitud-aceptada', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.post('/solicitud-aceptada', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { idowner } = req.body;
 
     const checkQuery = 'SELECT * FROM usuarios WHERE id = ?';
@@ -936,15 +781,8 @@ app.post('/solicitud-aceptada', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
 // api para cambiar foto de un usuario 
-app.post('/change-profile-photo', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.post('/change-profile-photo', async(req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { id, fotoUrl } = req.body;
 
     const query = 'UPDATE usuarios SET fotoperfil = ? WHERE id = ?';
@@ -968,15 +806,7 @@ app.post('/change-profile-photo', async(req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para eliminar un viaje en especifico 
-app.delete('/eliminar-viaje/:id', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.delete('/eliminar-viaje/:id', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const idViaje = req.params.id;
     const query = 'DELETE FROM viajes WHERE id = ?';
 
@@ -1009,15 +839,8 @@ app.delete('/eliminar-viaje/:id', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para eliminar una solicitud 
-app.delete('/eliminar-solicitud/:id', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
+
 app.delete('/eliminar-solicitud/:id', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const idowner = req.params.id;
     const query = 'DELETE FROM solicitudes WHERE idowner = ?';
 
@@ -1047,15 +870,7 @@ app.delete('/eliminar-solicitud/:id', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para cambiar un nombre de usuario 
-app.put('/change-username', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.put('/change-username', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { id, username } = req.body;
 
     if (!id || !username) {
@@ -1112,15 +927,7 @@ app.put('/change-username', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-// api para cambiar contrasena de un usuario
-app.put('/change-password', generalLimiter, (req, res) => {
-<<<<<<< HEAD
-=======
 app.put('/change-password', (req, res) => {
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
     const { id, pass } = req.body;
 
     if (!id || !pass) {
@@ -1158,16 +965,6 @@ app.put('/change-password', (req, res) => {
         });
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// ======================= FUNCIONES DE ENCRIPTACIÓN =======================
-=======
-// ======================= UTILIDADES =======================
-
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
-// ======================= FUNCIONES DE ENCRIPTACIÓN =======================
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
 function encriptarSimple(texto) {
     let resultado = '';
     for (let i = 0; i < texto.length; i++) {
@@ -1287,17 +1084,9 @@ async function processMessageQueue() {
         await new Promise(resolve => setTimeout(resolve, 50));
     }
     
-<<<<<<< HEAD
-<<<<<<< HEAD
     processingQueue = false;
 }
-=======
-    }catch(error)
-    {
-            console.error(error);
-            return res.json({success:false});
-    }
-});
+
 
 
 app.get('/api/conversations/by-trip/:viajeId/unread-count/:userId',async(req,res)=>{
@@ -1348,15 +1137,6 @@ app.get('/api/conversations/by-user/:userId/unread-summary', async (req, res) =>
 });
 
 
-
-// ======================= SOCKET.IO =======================
->>>>>>> parent of 3db82f8 (detalles y bugs)
-=======
-    processingQueue = false;
-}
->>>>>>> e8a364a7c5081892b98d1fa99764895d5b0bb93b
-
-// ======================= SOCKET.IO (OPTIMIZADO) =======================
 const activeUsers = new Map();
 
 io.on('connection', (socket) => {
