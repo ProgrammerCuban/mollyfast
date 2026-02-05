@@ -1,3 +1,2 @@
+- falta poner en verde los vajes que tengas sms perdidos en los deliverys
 - quitar los sms dobles que envias en los deliverys
-- poner la pagina de craga cuando abres un chat en deliverys y negocio
-- arreglar la parte de que cuando mandes un sms y el otro este conectado que le mande una notificacion.
