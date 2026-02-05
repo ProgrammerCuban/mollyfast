@@ -41,13 +41,13 @@ const chatSubtitle = document.getElementById('chatSubtitle');
 // Estado de pestañas
 let currentTab = 'disponibles';
 
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
     filterPrice.addEventListener('change', filtrarViajes);
-    refreshBtn.addEventListener('click', async function() {
+    refreshBtn.addEventListener('click', function() {
         if (currentTab === 'disponibles') {
-          await  cargarViajes();
+            cargarViajes();
         } else {
-            await cargarMisViajes();
+            cargarMisViajes();
         }
     });
 
@@ -92,7 +92,7 @@ function inicializarSocket() {
         
         // Si el mensaje es para el viaje actual, refrescar
         if (currentTab === 'misViajes') {
-            setTimeout(async() => await cargarMisViajes(), 500);
+            setTimeout(() => cargarMisViajes(), 500);
         }
     });
 }
@@ -425,11 +425,11 @@ function closeChat() {
     obtenerViajesConMensajesPerdidos();
     
     // Refrescar la vista actual después de un breve delay
-    setTimeout(async() => {
+    setTimeout(() => {
         if (currentTab === 'disponibles') {
-          await  cargarViajes();
+            cargarViajes();
         } else {
-           await cargarMisViajes();
+            cargarMisViajes();
         }
     }, 300);
 }
@@ -599,7 +599,7 @@ function formatearFecha(fechaISO) {
 }
 
 // Pestañas
-async function cambiarTab(tab) {
+function cambiarTab(tab) {
     currentTab = tab;
     
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -616,13 +616,13 @@ async function cambiarTab(tab) {
         document.getElementById('tabViajesDisponibles').classList.add('active');
         document.getElementById('viajesDisponiblesContent').classList.add('active');
         filtersSection.style.display = 'grid';
-         await cargarViajes();
+        cargarViajes();
     } 
     else if (tab === 'misViajes') {
         document.getElementById('tabMisViajes').classList.add('active');
         document.getElementById('misViajesContent').classList.add('active');
         filtersSection.style.display = 'none';
-        await cargarMisViajes();
+        cargarMisViajes();
     }
 }
 
