@@ -83,7 +83,7 @@ async function inicial() {
 function inicializarSocket() {
     socket.on('new_message', async (msg) => {
         if (Number(msg.conversation_id) === Number(currentConversationId)) {
-          //  await renderMessage(msg);
+           await renderMessage(msg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
@@ -393,7 +393,7 @@ function sendChatMessage() {
         is_read: true
     };
     
-    renderMessage(message);
+   // renderMessage(message);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     input.value = '';
