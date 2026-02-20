@@ -1,31 +1,31 @@
 // backend/config/database.js
 const mysql = require('mysql2');
 
-// Crear pool de conexiones (más eficiente)
+//Crear pool de conexiones (más eficiente)
+const pool = mysql.createPool({
+    host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com',
+    user: 'ufywen8m7kyqrwjc',
+    password: '1kCrbPepW8X3ggZxkRWS',
+    database: 'bwri3movw18oiln4pb5h',
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 5,
+    queueLimit: 0,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
 // const pool = mysql.createPool({
-//     host: 'bwri3movw18oiln4pb5h-mysql.services.clever-cloud.com',
-//     user: 'ufywen8m7kyqrwjc',
-//     password: '1kCrbPepW8X3ggZxkRWS',
-//     database: 'bwri3movw18oiln4pb5h',
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'mollyfast',
 //     port: 3306,
 //     waitForConnections: true,
 //     connectionLimit: 10,
-//     queueLimit: 0,
-//     ssl: {
-//         rejectUnauthorized: false
-//     }
-// });
-
-const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'mollyfast',
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
    
-});
+// });
 
 // Verificar conexión al iniciar
 pool.getConnection((err, connection) => {

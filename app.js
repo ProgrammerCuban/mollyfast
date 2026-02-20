@@ -16,6 +16,11 @@ const usuarioRoutes = require('./backend/routes/usuarioRoutes');
 const viajeRoutes = require('./backend/routes/viajeRoutes');
 const chatRoutes = require('./backend/routes/chatRoutes');
 
+// ===== NUEVAS IMPORTACIONES PARA SSE =====
+const notificationRoutes = require('./backend/routes/notificationRoutes');
+const smsNotificationService = require('./backend/services/smsNotificationService');
+// =========================================
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
@@ -88,6 +93,10 @@ app.use('/', usuarioRoutes);
 app.use('/', viajeRoutes);
 app.use('/', chatRoutes);
 
+// ===== NUEVAS RUTAS PARA NOTIFICACIONES =====
+app.use('/api/notifications', notificationRoutes);
+// ============================================
+
 // Ruta para ImageKit
 app.get('/imagekit-auth', (req, res) => {
     const ImageKit = require('imagekit');
@@ -116,9 +125,27 @@ function requireAuth(req, res, next) {
 const { setupSocketIO } = require('./backend/services/chatSocketService');
 setupSocketIO(io, pool);
 
+// ===== INICIAR SERVICIO DE NOTIFICACIONES =====
+smsNotificationService.start();
+// ==============================================
+
 // ======================= INICIAR SERVIDOR =======================
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor corriendo en puerto http://localhost:${PORT}`);
+    console.log(`📡 SSE endpoint: http://localhost:${PORT}/api/notifications/stream`);
+});
+
+// Manejar cierre graceful
+process.on('SIGINT', () => {
+    console.log('🛑 Cerrando servidor...');
+    smsNotificationService.stop();
+    process.exit();
+});
+
+process.on('SIGTERM', () => {
+    console.log('🛑 Cerrando servidor...');
+    smsNotificationService.stop();
+    process.exit();
 });
 
 module.exports = { app, server };

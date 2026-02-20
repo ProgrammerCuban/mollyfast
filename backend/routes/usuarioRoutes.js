@@ -186,21 +186,36 @@ router.post('/solicitud-idowner', async (req, res) => {
     }
 });
 
-// Aceptar solicitud
+// ===== MODIFICADO: Aceptar solicitud CON NOTIFICACIÓN =====
 router.post('/solicitud-aceptada', async (req, res) => {
-    const { idowner } = req.body;
+    const { idowner, userEmail, userName } = req.body;
 
     try {
         const success = await Usuario.aceptarSolicitud(idowner);
         
         if (success) {
-            return res.json({ success: true, message: 'solicitud aceptada correctamente' });
+            // Importar servicio de notificaciones
+            const smsNotificationService = require('../services/smsNotificationService');
+            
+            // Enviar notificación al usuario
+            await smsNotificationService.notifyDeliveryAccepted(idowner, userName || 'Usuario');
+            
+            return res.json({ 
+                success: true, 
+                message: 'solicitud aceptada correctamente y notificación enviada' 
+            });
         } else {
-            return res.json({ success: false, message: 'no se encontro al usuario' });
+            return res.json({ 
+                success: false, 
+                message: 'no se encontro al usuario' 
+            });
         }
     } catch (error) {
         console.error('Error aceptando solicitud:', error);
-        return res.json({ success: false, message: 'Error al chequear al usuario' });
+        return res.json({ 
+            success: false, 
+            message: 'Error al procesar la solicitud' 
+        });
     }
 });
 
